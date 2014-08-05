@@ -33,6 +33,7 @@ import pytest #contains `skip`, `fail`, `raises`, `config`
 import time
 import os.path as path
 
+
 #Set up logging fore useful debug output, and time stamps in UTC.
 import logging
 logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s', 
@@ -41,15 +42,31 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 logging.Formatter.converter = time.gmtime
 
 
-
-def relative(*path_comps):
+def relative_path(*path_comps):
     "Create file paths that are relative to the location of this file."
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
-
+def test_OsmandDownloader_get_map_list():
+    "Test method OsmandDownloader.get_map_list"
+    from mobile_map_downloader.download import OsmandDownloader
+    
+    d = OsmandDownloader()
+    d.get_map_list()
+    
+    
+def test_OsmandDownloader_download_file():
+    from mobile_map_downloader.download import OsmandDownloader
+    
+    url = "http://download.osmand.net/download.php?standard=yes&file=Afghanistan_asia_2.obf.zip"
+    d = OsmandDownloader()
+    d.download_file(url, None)
+    
+    
+    
 if __name__ == "__main__":
-#    test_xxx()
+    test_OsmandDownloader_get_map_list()
+#    test_OsmandDownloader_download_file()
     
     pass
  
