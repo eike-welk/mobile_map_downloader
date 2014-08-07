@@ -31,7 +31,10 @@ from __future__ import absolute_import
 import pytest #contains `skip`, `fail`, `raises`, `config`
 
 import time
+import os
 import os.path as path
+import operator
+from pprint import pprint
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -46,27 +49,70 @@ def relative_path(*path_comps):
     "Create file paths that are relative to the location of this file."
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
-
+def find_index(list_like, search_val, key=lambda x:x):
+    """
+    Find the index of an element in a list like container. 
+    
+    Accepts a custom function to compute the comparison key, like ``list.sort``.
+    
+    Returns
+    --------
+    
+    int | NoneType: Index of found element or ``None`` if no element is found.
+    """
+    for i, elem in enumerate(list_like):
+        comp_val = key(elem)
+        if comp_val == search_val:
+            return i 
+    else:
+        return None
+    
+    
 def test_OsmandDownloader_get_map_list():
     "Test method OsmandDownloader.get_map_list"
     from mobile_map_downloader.download import OsmandDownloader
     
+    print "Start get_map_list"
     d = OsmandDownloader()
-    d.get_map_list()
+    l = d.get_map_list()
+    pprint(l)
+    print len(l)
+    
+    #Asserts that may easily break
+    assert find_index(l, "osmand/France_rhone-alpes_europe_2.obf.zip", 
+                      key=lambda e: e.disp_name) is not None
+    assert find_index(l, "osmand/Germany_nordrhein-westfalen_europe_2.obf.zip", 
+                      key=lambda e: e.disp_name) is not None
+    assert l[0].disp_name == "osmand/Afghanistan_asia_2.obf.zip"
+    assert l[-1].disp_name == "osmand/Zimbabwe_africa_2.obf.zip"
+    assert len(l) == 519
     
     
 def test_OsmandDownloader_download_file():
     from mobile_map_downloader.download import OsmandDownloader
     
-    url = "http://download.osmand.net/download.php?standard=yes&file=Afghanistan_asia_2.obf.zip"
-    d = OsmandDownloader()
-    d.download_file(url, None)
+    print "Start download_file"
+    test_map_name = relative_path("../../test_tmp/test_1.obf.zip")
+    try: os.remove(test_map_name)
+    except: pass
     
+#    #File size 0.2 MiB
+#    url = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
+    #File size 3.0 MiB
+    url = "http://download.osmand.net/download.php?standard=yes&file=Jamaica_centralamerica_2.obf.zip"
+    
+    d = OsmandDownloader()
+    d.download_file(url, test_map_name, "test-file-name.foo")
+    
+    assert path.isfile(test_map_name)
+    file_size = path.getsize(test_map_name)/1024**2
+    print "file size [MiB]:", file_size
+    assert round(file_size, 1) == 3.0
     
     
 if __name__ == "__main__":
-    test_OsmandDownloader_get_map_list()
-#    test_OsmandDownloader_download_file()
+#    test_OsmandDownloader_get_map_list()
+    test_OsmandDownloader_download_file()
     
     pass
  
