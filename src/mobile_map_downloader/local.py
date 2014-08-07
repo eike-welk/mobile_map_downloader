@@ -49,10 +49,7 @@ logging.Formatter.converter = time.gmtime
 class OsmandManager(object):
     """
     Manage locally stored maps for Osmand.
-    """
-    download_dir = ""
-    #Directory where the downloaded zip files are stored. Must be initialized.
-    
+    """    
     def __init__(self, download_dir):
         self.download_dir = download_dir
     
@@ -87,63 +84,81 @@ class OsmandManager(object):
         return map_metas
         
     
-    def get_map_extractor(self, archive_name):
+    def get_map_extractor(self, archive_path):
         """
         Create file like object, that extracts the map from the zip file.
         Additionally returns some metadata. 
+        
+        Argument
+        --------
+        
+        archive_path: str
+            Path to archive that contains the map.
+        
+        Returns
+        -------
+        
+        fzip: file like object
+            Object that extracts a map from a zip file. Behaves like a file.
+            
+        size_total: int
+            Uncompressed size of the map.
+            
+        mod_time: date_time.date_time
+            Modification time of the map, from the zip archive.
         """
-        zip_container = zipfile.ZipFile(archive_name, "r")
+        zip_container = zipfile.ZipFile(archive_path, "r")
 #        zip_fnames = zip_container.namelist()
 #        print zip_fnames
         zip_finfos = zip_container.infolist()
         zip_fname = zip_finfos[0].filename
         size_total = zip_finfos[0].file_size
-        date_time = datetime.datetime(*zip_finfos[0].date_time)
+        mod_time = datetime.datetime(*zip_finfos[0].date_time)
         fzip = zip_container.open(zip_fname, "r")
         
-        return fzip, size_total, date_time
+        return fzip, size_total, mod_time
         
         
-    def prepare_map(self, in_name, out_name, disp_name):
-        """
-        Prepare a map for installation - extract it from the ".zip" archive.
-        
-        The name is chosen to be more generally than "extract", because other
-        map formats might need a different transformation before
-        the maps can be installed on the device.
-        
-        TODO: Only return file like object, the temporary uncompressed 
-              file is unnecessary. 
-              * Open-Andromaps also distributes zip-files with maps
-              * The file system will maybe provide multi threading for free, 
-                when the extracted contents is directly stored on the SD-card. 
-        """
-        buff_size = 1024**2 * 10
-        backspace = chr(8)
-        anim_frames = "/-\-"
-        disp_name = disp_name[0:50]
-        
-        fzip, size_total, _ = self.get_map_extractor(in_name)
-        fext = open(out_name, "wb")
-        size_total_mib = round(size_total / 1024**2, 1)
-        size_down = 0
-        
-        for frame in cycle(anim_frames):
-            #download a piece of the file
-            buf = fzip.read(buff_size)
-            if not buf:
-                break
-            fext.write(buf)
-            
-            #create progress animation
-            size_down += len(buf)
-            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
-                name=disp_name, size=size_total_mib, 
-                proc=round(size_down / size_total * 100), anim=frame)
-            msg += backspace * (len(msg) + 1)
-            print msg,
-        print "{name} : {size} MiB - uncompressed".format(
-                name=disp_name, size=size_total_mib)
+#    def prepare_map(self, in_name, out_name, disp_name):
+#        """
+#        Prepare a map for installation - extract it from the ".zip" archive.
+#        
+#        The name is chosen to be more generally than "extract", because other
+#        map formats might need a different transformation before
+#        the maps can be installed on the device.
+#        
+#        TODO: Only return file like object, the temporary uncompressed 
+#              file is unnecessary. 
+#              * Open-Andromaps also distributes zip-files with maps
+#              * The file system will maybe provide multi threading for free, 
+#                when the extracted contents is directly stored on the SD-card. 
+#        """
+#        buff_size = 1024**2 * 10
+#        backspace = chr(8)
+#        anim_frames = "/-\-"
+#        disp_name = disp_name[0:50]
+#        
+#        fzip, size_total, _ = self.get_map_extractor(in_name)
+#        fext = open(out_name, "wb")
+#        size_total_mib = round(size_total / 1024**2, 1)
+#        size_down = 0
+#        
+#        for frame in cycle(anim_frames):
+#            #download a piece of the file
+#            buf = fzip.read(buff_size)
+#            if not buf:
+#                break
+#            fext.write(buf)
+#            
+#            #create progress animation
+#            size_down += len(buf)
+#            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
+#                name=disp_name, size=size_total_mib, 
+#                proc=round(size_down / size_total * 100), anim=frame)
+#            msg += backspace * (len(msg) + 1)
+#            print msg,
+#        print "{name} : {size} MiB - uncompressed".format(
+#                name=disp_name, size=size_total_mib)
 
         
         

@@ -108,11 +108,13 @@ class OsmandDownloader(object):
             link = row[0][0]
             map_meta = MapMeta(disp_name = "osmand/" + link.text.split(".")[0], 
                                tech_name = self.list_url + link.get("href"), 
-                               size = float(row[2].text), #[MiB]
+                               size = float(row[2].text) * 1024**2, #[Byte]
                                date =  dateutil.parser.parse(row[1].text), 
                                description = row[3].text, 
                                map_type = "osmand")
             map_metas.append(map_meta)
+            
+        map_metas.sort(key=lambda m: m.disp_name)
         return map_metas
     
     
@@ -164,6 +166,8 @@ class OsmandDownloader(object):
                 proc=round(size_down / size_total * 100), anim=frame)
             msg += backspace * (len(msg) + 1)
             print msg,
+            
+        floc.close()
         print "{name} : {size} MiB - downloaded".format(
                 name=disp_name, size=size_total_mib)
     
