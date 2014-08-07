@@ -33,6 +33,7 @@ import urllib2
 import lxml.html
 import dateutil.parser
 from itertools import cycle
+import zipfile
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -44,7 +45,7 @@ logging.Formatter.converter = time.gmtime
 
 
 MapMeta = namedtuple("MapMeta", 
-                     "disp_name, srv_url, size, date, description, map_type")
+                     "disp_name, tech_name, size, date, description, map_type")
 #Some meta data about each map
 #    map_type: "osmand" | "mapsforge"
 
@@ -102,18 +103,19 @@ class OsmandDownloader(object):
         #Parse HTML list of maps
         root = lxml.html.document_fromstring(list_html)
         table = root.find(".//table")
-        map_list = []
+        map_metas = []
         for row in table[2:]:
             link = row[0][0]
-            map_meta = MapMeta(disp_name = "osmand/" + link.text, 
-                               srv_url = self.list_url + link.get("href"), 
+            map_meta = MapMeta(disp_name = "osmand/" + link.text.split(".")[0], 
+                               tech_name = self.list_url + link.get("href"), 
                                size = float(row[2].text), #[MiB]
                                date =  dateutil.parser.parse(row[1].text), 
                                description = row[3].text, 
                                map_type = "osmand")
-            map_list.append(map_meta)
-        return map_list
-        
+            map_metas.append(map_meta)
+        return map_metas
+    
+    
     def download_file(self, srv_url, loc_name, disp_name):
         """
         Download a file from the server and store it in the local file system.
@@ -139,7 +141,7 @@ class OsmandDownloader(object):
         buff_size = 1024 * 50
         backspace = chr(8)
         anim_frames = "/-\-"
-        disp_name = disp_name[0:40]
+        disp_name = disp_name[0:50]
         
         fsrv = urllib2.urlopen(srv_url)
         floc = open(loc_name, "wb")
@@ -157,10 +159,14 @@ class OsmandDownloader(object):
             
             #create progress animation
             size_down += len(buf)
-            msg = "{name} : {size} MiB, {proc}%  {anim}".format(
+            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
                 name=disp_name, size=size_total_mib, 
                 proc=round(size_down / size_total * 100), anim=frame)
             msg += backspace * (len(msg) + 1)
             print msg,
-        print 
+        print "{name} : {size} MiB - downloaded".format(
+                name=disp_name, size=size_total_mib)
+    
+
         
+    

@@ -21,7 +21,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 ###############################################################################
 """
-Test the Osmand specific functions.
+Test the download functions.
 """
 
 from __future__ import division
@@ -59,6 +59,8 @@ def find_index(list_like, search_val, key=lambda x:x):
     --------
     
     int | NoneType: Index of found element or ``None`` if no element is found.
+    
+    TODO: Write unit test.
     """
     for i, elem in enumerate(list_like):
         comp_val = key(elem)
@@ -69,32 +71,42 @@ def find_index(list_like, search_val, key=lambda x:x):
     
     
 def test_OsmandDownloader_get_map_list():
-    "Test method OsmandDownloader.get_map_list"
+    "Test class OsmandDownloader: Listing of files that can be downloaded."
     from mobile_map_downloader.download import OsmandDownloader
     
     print "Start get_map_list"
     d = OsmandDownloader()
     l = d.get_map_list()
+    
     pprint(l)
     print len(l)
     
-    #Asserts that may easily break
-    assert find_index(l, "osmand/France_rhone-alpes_europe_2.obf.zip", 
-                      key=lambda e: e.disp_name) is not None
-    assert find_index(l, "osmand/Germany_nordrhein-westfalen_europe_2.obf.zip", 
-                      key=lambda e: e.disp_name) is not None
-    assert l[0].disp_name == "osmand/Afghanistan_asia_2.obf.zip"
-    assert l[-1].disp_name == "osmand/Zimbabwe_africa_2.obf.zip"
-    assert len(l) == 519
+    #Test if some files exist
+    get_disp_name = lambda e: e.disp_name
+    assert find_index(l, "osmand/France_rhone-alpes_europe_2", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "osmand/Germany_nordrhein-westfalen_europe_2", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "osmand/Jamaica_centralamerica_2", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "osmand/Monaco_europe_2", 
+                      key=get_disp_name) is not None
+    #Test the names of first & last file
+    assert l[0].disp_name == "osmand/Afghanistan_asia_2"
+    assert l[-1].disp_name == "osmand/Zimbabwe_africa_2"
+    #Number of files must be in certain range.
+    assert 500 < len(l) < 550
     
     
 def test_OsmandDownloader_download_file():
+    "Test class OsmandDownloader: Downloading of files from Osmand server."
     from mobile_map_downloader.download import OsmandDownloader
     
     print "Start download_file"
     test_map_name = relative_path("../../test_tmp/test_1.obf.zip")
     try: os.remove(test_map_name)
     except: pass
+    assert not path.exists(test_map_name)
     
 #    #File size 0.2 MiB
 #    url = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
@@ -104,6 +116,7 @@ def test_OsmandDownloader_download_file():
     d = OsmandDownloader()
     d.download_file(url, test_map_name, "test-file-name.foo")
     
+    #Test name and size of downloaded file
     assert path.isfile(test_map_name)
     file_size = path.getsize(test_map_name)/1024**2
     print "file size [MiB]:", file_size
@@ -112,7 +125,6 @@ def test_OsmandDownloader_download_file():
     
 if __name__ == "__main__":
 #    test_OsmandDownloader_get_map_list()
-    test_OsmandDownloader_download_file()
+#    test_OsmandDownloader_download_file()
     
     pass
- 
