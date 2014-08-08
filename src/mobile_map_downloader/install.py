@@ -104,9 +104,9 @@ class OsmandInstaller(object):
         size_total: int [Bytes]
             The size of the map, uncompressed.
         """
-#        maps_dir = path.join(self.device_dir, "osmand")
-        file_name = disp_name + ".obf"
-        map_path = path.join(self.device_dir, file_name)
+        maps_dir = path.join(self.device_dir, "osmand")
+        file_name = disp_name.split("/")[1] + ".obf"
+        map_path = path.join(maps_dir, file_name)
         
         buff_size = 1024**2 * 10
         backspace = chr(8)

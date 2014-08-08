@@ -93,7 +93,7 @@ def test_OsmandDownloader_get_map_list():
                       key=get_disp_name) is not None
     #Test the names of first & last file
     assert l[0].disp_name == "osmand/Afghanistan_asia_2"
-    assert l[-1].disp_name == "osmand/Zimbabwe_africa_2"
+    assert l[-1].disp_name == "osmand/zh_0"
     #Number of files must be in certain range.
     assert 500 < len(l) < 550
     
@@ -124,7 +124,7 @@ def test_OsmandDownloader_download_file():
     
     
 if __name__ == "__main__":
-#    test_OsmandDownloader_get_map_list()
+    test_OsmandDownloader_get_map_list()
 #    test_OsmandDownloader_download_file()
     
     pass

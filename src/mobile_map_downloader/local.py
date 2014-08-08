@@ -33,7 +33,6 @@ import fnmatch
 from os import path
 import zipfile
 import datetime
-from itertools import cycle
 
 from mobile_map_downloader.download import MapMeta
 
@@ -52,6 +51,11 @@ class OsmandManager(object):
     """    
     def __init__(self, download_dir):
         self.download_dir = download_dir
+        
+        #Create own subdir of download dir if it does not exist.
+        osmand_dl_dir = path.join(self.download_dir, "osmand")
+        if not path.exists(osmand_dl_dir):
+            os.mkdir(osmand_dl_dir)
     
 
     def get_map_list(self):
@@ -64,13 +68,14 @@ class OsmandManager(object):
         
         list[MapMeta]
         """
-        dir_names = os.listdir(self.download_dir)
+        osmand_dl_dir = path.join(self.download_dir, "osmand")
+        dir_names = os.listdir(osmand_dl_dir)
         map_names = fnmatch.filter(dir_names, "*.obf.zip")
         map_names.sort()
         
         map_metas = []
         for name in map_names:
-            archive_name = path.join(self.download_dir, name)
+            archive_name = path.join(osmand_dl_dir, name)
             disp_name = "osmand/" + name.split(".")[0]
             _, size_total, date_time = self.get_map_extractor(archive_name)
             map_meta = MapMeta(disp_name=disp_name, 

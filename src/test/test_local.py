@@ -65,7 +65,7 @@ def test_OsmandManager_get_map_list():
 #    d.download_file(srvname, locname, "osmand/Jamaica_centralamerica_2")
 
     from mobile_map_downloader.local import OsmandManager
-    download_dir = relative_path("../../test_data/maps/osmand/")
+    download_dir = relative_path("../../test_data/maps/")
     
     m = OsmandManager(download_dir)
     l = m.get_map_list()

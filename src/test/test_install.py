@@ -72,17 +72,17 @@ def test_OsmandInstaller_install_map():
     from mobile_map_downloader.install import OsmandInstaller  
     from mobile_map_downloader.local import OsmandManager
     
-    device_path = relative_path("../../test_tmp/TEST-DEVICE1")    
+    device_dir = relative_path("../../test_tmp/TEST-DEVICE1")    
     map_path =    relative_path("../../test_tmp/TEST-DEVICE1/osmand/Jamaica_centralamerica_2.obf")
-    download_dir = relative_path("../../test_data/maps/osmand/")
+    download_dir = relative_path("../../test_data/maps/")
     archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
 
     #Remove old output directory, and create new empty output directory
-    shutil.rmtree(device_path, ignore_errors=True)
-    os.makedirs(path.join(device_path, "osmand"))
+    shutil.rmtree(device_dir, ignore_errors=True)
+    os.makedirs(path.join(device_dir, "osmand"))
     
     m = OsmandManager(download_dir)
-    i = OsmandInstaller(device_path)
+    i = OsmandInstaller(device_dir)
     extractor, size_total, _ = m.get_map_extractor(archive_path)
     i.install_map(extractor, "osmand/Jamaica_centralamerica_2", size_total)
     
