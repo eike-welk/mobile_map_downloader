@@ -31,7 +31,6 @@ import time
 import os
 import fnmatch
 from os import path
-import zipfile
 import datetime
 from itertools import cycle
 

@@ -33,7 +33,6 @@ import urllib2
 import lxml.html
 import dateutil.parser
 from itertools import cycle
-import zipfile
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.

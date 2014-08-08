@@ -28,12 +28,11 @@ from __future__ import division
 from __future__ import absolute_import              
 
 #For test modules: ----------------------------------------------------------
-import pytest #contains `skip`, `fail`, `raises`, `config`
+#import pytest #contains `skip`, `fail`, `raises`, `config`
 
 import time
 import os
 import os.path as path
-import operator
 from pprint import pprint
 
 
