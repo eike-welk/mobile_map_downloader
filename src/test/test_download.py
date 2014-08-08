@@ -123,7 +123,7 @@ def test_OsmandDownloader_download_file():
     
     
 if __name__ == "__main__":
-    test_OsmandDownloader_get_map_list()
-#    test_OsmandDownloader_download_file()
+#    test_OsmandDownloader_get_map_list()
+    test_OsmandDownloader_download_file()
     
     pass

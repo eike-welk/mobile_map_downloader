@@ -28,11 +28,12 @@ from __future__ import division
 from __future__ import absolute_import              
 
 import time
-from collections import namedtuple
 import urllib2
 import lxml.html
 import dateutil.parser
-from itertools import cycle
+
+from mobile_map_downloader.common import MapMeta
+from mobile_map_downloader.common import TextProgressBar
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -43,11 +44,6 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 logging.Formatter.converter = time.gmtime
 
 
-MapMeta = namedtuple("MapMeta", 
-                     "disp_name, tech_name, size, date, description, map_type")
-#Some meta data about each map
-#    map_type: "osmand" | "mapsforge"
-
 class OsmandDownloader(object):
     """
     Download maps from the servers of the Osmand project.
@@ -56,6 +52,15 @@ class OsmandDownloader(object):
     
     def __init__(self):
         pass
+        
+    
+    def make_disp_name(self, server_name):
+        """
+        Create an internal name from the name, that the server supplies.
+        This internal name is used in the user interface.
+        """
+        pass
+    
     
     def get_map_list(self):
         """
@@ -106,7 +111,7 @@ class OsmandDownloader(object):
         for row in table[2:]:
             link = row[0][0]
             map_meta = MapMeta(disp_name = "osmand/" + link.text.split(".")[0], 
-                               tech_name = self.list_url + link.get("href"), 
+                               full_name = self.list_url + link.get("href"), 
                                size = float(row[2].text) * 1024**2, #[Byte]
                                date =  dateutil.parser.parse(row[1].text), 
                                description = row[3].text, 
@@ -132,44 +137,35 @@ class OsmandDownloader(object):
             
         loc_name: str
             Name of the file in the local file system.
+            TODO: remove argument, compute ``loc_name`` from ``disp_name``
             
         disp_name: str 
             File name for display in the progress bar.
             
         TODO: Dynamically adapt ``buff_size`` so that the animation is updated
-              once per second.
+              once per second.  
         """
-        buff_size = 1024 * 50
-        backspace = chr(8)
-        anim_frames = "/-\-"
-        disp_name = disp_name[0:50]
-        
         fsrv = urllib2.urlopen(srv_url)
         floc = open(loc_name, "wb")
         
         meta = fsrv.info()
         size_total = int(meta.getheaders("Content-Length")[0])
-        size_total_mib = round(size_total / 1024**2, 1)
+        size_mib = round(size_total / 1024**2, 1)
+        msg = "{name} : {size} MiB".format(name=disp_name[0:50], size=size_mib)
+        progress = TextProgressBar(msg, val_max=size_total)
+        
+        buff_size = 1024 * 100
         size_down = 0
-        for frame in cycle(anim_frames):
-            #download a piece of the file
+        while True:
+            progress.update_val(size_down)
             buf = fsrv.read(buff_size)
             if not buf:
                 break
             floc.write(buf)
-            
-            #create progress animation
             size_down += len(buf)
-            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
-                name=disp_name, size=size_total_mib, 
-                proc=round(size_down / size_total * 100), anim=frame)
-            msg += backspace * (len(msg) + 1)
-            print msg,
             
         floc.close()
-        print "{name} : {size} MiB - downloaded".format(
-                name=disp_name, size=size_total_mib)
-    
+        progress.update_final(size_down, "Downloaded")
 
         
     

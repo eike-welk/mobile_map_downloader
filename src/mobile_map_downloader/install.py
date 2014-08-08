@@ -34,7 +34,8 @@ from os import path
 import datetime
 from itertools import cycle
 
-from mobile_map_downloader.download import MapMeta
+from mobile_map_downloader.common import MapMeta
+from mobile_map_downloader.common import TextProgressBar
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -75,7 +76,7 @@ class OsmandInstaller(object):
             map_size = path.getsize(map_name)
             mod_time = path.getmtime(map_name)
             map_meta = MapMeta(disp_name=disp_name, 
-                               tech_name=map_name, 
+                               full_name=map_name, 
                                size=map_size, 
                                date=datetime.datetime.fromtimestamp(mod_time), 
                                description="", 
@@ -85,7 +86,7 @@ class OsmandInstaller(object):
         return map_metas
     
     
-    def install_map(self, extractor, disp_name, size_total):
+    def install_map(self, extractor, sd_path, disp_name, size_total):
         """
         Install one map file in Osmand's directory on the SD card.
         
@@ -95,44 +96,34 @@ class OsmandInstaller(object):
         extractor: file like object
             An object that extracts the map from the zip archive. It behaves
             like a file.
-            
+        
+        sd_path: str
+            Path of the map on the mobile device's SD card.
+        
         disp_name: str
-            Canonical name of the map. The name on the SD card is computed 
-            from it.
+            Canonical name of the map. Used in the progress bar.
             
         size_total: int [Bytes]
             The size of the map, uncompressed.
         """
-        maps_dir = path.join(self.device_dir, "osmand")
-        file_name = disp_name.split("/")[1] + ".obf"
-        map_path = path.join(maps_dir, file_name)
+        size_mib = round(size_total / 1024**2, 1)
+        msg = "{name} : {size} MiB".format(name=disp_name[0:50], size=size_mib)
+        progress = TextProgressBar(msg, val_max=size_total)
+        progress.update_val(0)
+        
+        fsdcard = open(sd_path, "wb")
         
         buff_size = 1024**2 * 10
-        backspace = chr(8)
-        anim_frames = "/-\-"
-        disp_name = disp_name[0:50]
-        size_total_mib = round(size_total / 1024**2, 1)
-        
-        fsdcard = open(map_path, "wb")
         size_down = 0
-        
-        for frame in cycle(anim_frames):
-            #download a piece of the file
+        while True:
+            progress.update_val(size_down)
             buf = extractor.read(buff_size)
             if not buf:
                 break
             fsdcard.write(buf)
-            
-            #create progress animation
             size_down += len(buf)
-            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
-                name=disp_name, size=size_total_mib, 
-                proc=round(size_down / size_total * 100), anim=frame)
-            msg += backspace * (len(msg) + 1)
-            print msg,
             
         fsdcard.close()
-        print "{name} : {size} MiB - installed".format(
-                name=disp_name, size=size_total_mib)
+        progress.update_final(size_down, "Installed")
 
         

@@ -34,7 +34,7 @@ from os import path
 import zipfile
 import datetime
 
-from mobile_map_downloader.download import MapMeta
+from mobile_map_downloader.common import MapMeta
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -79,7 +79,7 @@ class OsmandManager(object):
             disp_name = "osmand/" + name.split(".")[0]
             _, size_total, date_time = self.get_map_extractor(archive_name)
             map_meta = MapMeta(disp_name=disp_name, 
-                               tech_name=archive_name, 
+                               full_name=archive_name, 
                                size=size_total, 
                                date=date_time, 
                                description="", 

@@ -21,7 +21,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.    #
 ###############################################################################
 """
-Test the download functions.
+Test the ``common`` module.
 """
 
 from __future__ import division
@@ -34,7 +34,6 @@ import time
 import os
 import os.path as path
 from pprint import pprint
-import shutil
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -50,49 +49,21 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
-def test_OsmandInstaller_get_map_list():
-    "OsmandInstaller: Get list of installed maps."
-    from mobile_map_downloader.install import OsmandInstaller   
+def test_TextProgressBar():
+    """
+    Test class TextProgressBar
+    """
+    from mobile_map_downloader.common import TextProgressBar
     
-    device_path = relative_path("../../test_data/TEST-DEVICE1")
+    print "Start"
+    pb = TextProgressBar("Foo: 42 bar", 42)
+    for v in range(0, 42, 10):
+        pb.update_val(v)
+        time.sleep(1)
+    pb.update_final(42, "Finished")
     
-    i = OsmandInstaller(device_path)
-    l = i.get_map_list()
     
-    pprint(l)
-    assert len(l) == 2
-    assert l[0].disp_name == 'osmand/Jamaica_centralamerica_2'
-    assert l[0].size == 4518034
-    assert l[1].disp_name == "osmand/Monaco_europe_2"
-    assert l[1].size == 342685
-
-    
-def test_OsmandInstaller_install_map():
-    "OsmandInstaller: Install one map file."
-    from mobile_map_downloader.install import OsmandInstaller  
-    from mobile_map_downloader.local import OsmandManager
-    
-    download_dir = relative_path("../../test_data/maps/")
-    archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
-    device_dir = relative_path("../../test_tmp/TEST-DEVICE1")    
-    map_path =   relative_path("../../test_tmp/TEST-DEVICE1/osmand/Jamaica_centralamerica_2.obf")
-
-    #Remove old output directory, and create new empty output directory
-    shutil.rmtree(device_dir, ignore_errors=True)
-    os.makedirs(path.join(device_dir, "osmand"))
-    
-    m = OsmandManager(download_dir)
-    i = OsmandInstaller(device_dir)
-    extractor, size_total, _ = m.get_map_extractor(archive_path)
-    i.install_map(extractor, map_path, "osmand/Jamaica_centralamerica_2", size_total)
-    
-    print "path.getsize(archive_path):", path.getsize(map_path)
-    assert path.isfile(map_path)
-    assert path.getsize(map_path) == 4518034
-    
-
 if __name__ == "__main__":
-#    test_OsmandInstaller_get_map_list()
-    test_OsmandInstaller_install_map()
+    test_TextProgressBar()
     
     pass
