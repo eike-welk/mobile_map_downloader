@@ -49,15 +49,37 @@ class OsmandManager(object):
     """
     Manage locally stored maps for Osmand.
     """    
-    def __init__(self, download_dir):
-        self.download_dir = download_dir
+    def __init__(self, download_dir_root):
+#        self.download_dir_root = download_dir_root
+        self.download_dir = path.join(download_dir_root, "osmand")
         
         #Create own subdir of download dir if it does not exist.
-        osmand_dl_dir = path.join(self.download_dir, "osmand")
-        if not path.exists(osmand_dl_dir):
-            os.mkdir(osmand_dl_dir)
+        if not path.exists(self.download_dir):
+            os.mkdir(self.download_dir)
     
 
+    def make_disp_name(self, file_name_path):
+        """
+        Create a canonical name from a file name or path of a locally stored
+        zipped map. 
+        The canonical name is used in the user interface.
+        
+        The canonical name has the form:
+            "osmand/Country_Name.obf" or
+            "osmand/Language.voice"
+        """
+        _, file_name = path.split(file_name_path)
+        disp_name = "osmand/" + file_name.rsplit(".", 1)[0]
+        return disp_name
+    
+    def make_full_name(self, disp_name):
+        """
+        Create a path to a locally stored map from its canonical name. 
+        """
+        _, fname = path.split(disp_name)
+        full_name = path.join(self.download_dir, fname + ".zip")
+        return full_name
+    
     def get_map_list(self):
         """
         Return a list of locally stored maps. Maps are searched in 
@@ -68,15 +90,14 @@ class OsmandManager(object):
         
         list[MapMeta]
         """
-        osmand_dl_dir = path.join(self.download_dir, "osmand")
-        dir_names = os.listdir(osmand_dl_dir)
+        dir_names = os.listdir(self.download_dir)
         map_names = fnmatch.filter(dir_names, "*.obf.zip")
         map_names.sort()
         
         map_metas = []
         for name in map_names:
-            archive_name = path.join(osmand_dl_dir, name)
-            disp_name = "osmand/" + name.split(".")[0]
+            archive_name = path.join(self.download_dir, name)
+            disp_name = self.make_disp_name(name)
             _, size_total, date_time = self.get_map_extractor(archive_name)
             map_meta = MapMeta(disp_name=disp_name, 
                                full_name=archive_name, 
@@ -88,7 +109,6 @@ class OsmandManager(object):
             
         return map_metas
         
-    
     def get_map_extractor(self, archive_path):
         """
         Create file like object, that extracts the map from the zip file.
@@ -122,49 +142,5 @@ class OsmandManager(object):
         fzip = zip_container.open(zip_fname, "r")
         
         return fzip, size_total, mod_time
-        
-        
-#    def prepare_map(self, in_name, out_name, disp_name):
-#        """
-#        Prepare a map for installation - extract it from the ".zip" archive.
-#        
-#        The name is chosen to be more generally than "extract", because other
-#        map formats might need a different transformation before
-#        the maps can be installed on the device.
-#        
-#        TODO: Only return file like object, the temporary uncompressed 
-#              file is unnecessary. 
-#              * Open-Andromaps also distributes zip-files with maps
-#              * The file system will maybe provide multi threading for free, 
-#                when the extracted contents is directly stored on the SD-card. 
-#        """
-#        buff_size = 1024**2 * 10
-#        backspace = chr(8)
-#        anim_frames = "/-\-"
-#        disp_name = disp_name[0:50]
-#        
-#        fzip, size_total, _ = self.get_map_extractor(in_name)
-#        fext = open(out_name, "wb")
-#        size_total_mib = round(size_total / 1024**2, 1)
-#        size_down = 0
-#        
-#        for frame in cycle(anim_frames):
-#            #download a piece of the file
-#            buf = fzip.read(buff_size)
-#            if not buf:
-#                break
-#            fext.write(buf)
-#            
-#            #create progress animation
-#            size_down += len(buf)
-#            msg = "{name} : {size} MiB - {proc}%  {anim}".format(
-#                name=disp_name, size=size_total_mib, 
-#                proc=round(size_down / size_total * 100), anim=frame)
-#            msg += backspace * (len(msg) + 1)
-#            print msg,
-#        print "{name} : {size} MiB - uncompressed".format(
-#                name=disp_name, size=size_total_mib)
-
-        
         
         

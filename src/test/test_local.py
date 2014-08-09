@@ -71,8 +71,8 @@ def test_OsmandManager_get_map_list():
     
     pprint(l)
     assert len(l) == 2
-    assert l[0].disp_name == "osmand/Jamaica_centralamerica_2"
-    assert l[1].disp_name == "osmand/Monaco_europe_2"
+    assert l[0].disp_name == "osmand/Jamaica_centralamerica_2.obf"
+    assert l[1].disp_name == "osmand/Monaco_europe_2.obf"
 
 
 def test_OsmandManager_get_map_extractor():

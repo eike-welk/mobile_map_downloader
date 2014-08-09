@@ -56,10 +56,16 @@ class OsmandDownloader(object):
     
     def make_disp_name(self, server_name):
         """
-        Create an internal name from the name, that the server supplies.
-        This internal name is used in the user interface.
+        Create a canonical name from the name, that the server supplies.
+        This canonical name is used in the user interface.
+        
+        The canonical name has the form:
+            "osmand/Country_Name.obf" or
+            "osmand/Language.voice"
         """
-        pass
+        #The server delivers name of the form "Country_Name.obf.zip"
+        disp_name = "osmand/" + server_name.rsplit(".", 1)[0]
+        return disp_name
     
     
     def get_map_list(self):
@@ -110,12 +116,12 @@ class OsmandDownloader(object):
         map_metas = []
         for row in table[2:]:
             link = row[0][0]
-            map_meta = MapMeta(disp_name = "osmand/" + link.text.split(".")[0], 
-                               full_name = self.list_url + link.get("href"), 
-                               size = float(row[2].text) * 1024**2, #[Byte]
-                               date =  dateutil.parser.parse(row[1].text), 
-                               description = row[3].text, 
-                               map_type = "osmand")
+            map_meta = MapMeta(disp_name=self.make_disp_name(link.text), 
+                               full_name=self.list_url + link.get("href"), 
+                               size=float(row[2].text) * 1024**2, #[Byte]
+                               date=dateutil.parser.parse(row[1].text), 
+                               description=row[3].text, 
+                               map_type="osmand")
             map_metas.append(map_meta)
             
         map_metas.sort(key=lambda m: m.disp_name)

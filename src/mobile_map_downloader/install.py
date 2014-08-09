@@ -51,7 +51,33 @@ class OsmandInstaller(object):
     Install maps for Osmand on the mobile device.
     """
     def __init__(self, device_dir):
-        self.device_dir = device_dir
+#        self.device_dir = device_dir
+        self.osmand_dir = path.join(device_dir, "osmand")
+        
+        #Create Osmand directory, if it does not exist.
+        if not path.exists(self.osmand_dir):
+            os.mkdir(self.osmand_dir)
+    
+    def make_disp_name(self, file_name_path):
+        """
+        Create a canonical name from a file name or path of a installed map. 
+        The canonical name is used in the user interface.
+        
+        The canonical name has the form:
+            "osmand/Country_Name.obf" or
+            "osmand/Language.voice"
+        """
+        _, file_name = path.split(file_name_path)
+        disp_name = "osmand/" + file_name
+        return disp_name
+    
+    def make_full_name(self, disp_name):
+        """
+        Create a path to a locally stored map from its canonical name. 
+        """
+        _, fname = path.split(disp_name)
+        full_name = path.join(self.osmand_dir, fname)
+        return full_name
     
     def get_map_list(self):
         """
@@ -64,15 +90,14 @@ class OsmandInstaller(object):
         
         list[MapMeta]
         """
-        maps_dir = path.join(self.device_dir, "osmand")
-        dir_names = os.listdir(maps_dir)
+        dir_names = os.listdir(self.osmand_dir)
         map_names = fnmatch.filter(dir_names, "*.obf")
         map_names.sort()
         
         map_metas = []
         for name in map_names:
-            map_name = path.join(maps_dir, name)
-            disp_name = "osmand/" + name.split(".")[0]
+            map_name = path.join(self.osmand_dir, name)
+            disp_name = self.make_disp_name(name)
             map_size = path.getsize(map_name)
             mod_time = path.getmtime(map_name)
             map_meta = MapMeta(disp_name=disp_name, 

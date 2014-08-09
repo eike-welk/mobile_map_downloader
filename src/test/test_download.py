@@ -82,17 +82,17 @@ def test_OsmandDownloader_get_map_list():
     
     #Test if some files exist
     get_disp_name = lambda e: e.disp_name
-    assert find_index(l, "osmand/France_rhone-alpes_europe_2", 
+    assert find_index(l, "osmand/France_rhone-alpes_europe_2.obf", 
                       key=get_disp_name) is not None
-    assert find_index(l, "osmand/Germany_nordrhein-westfalen_europe_2", 
+    assert find_index(l, "osmand/Germany_nordrhein-westfalen_europe_2.obf", 
                       key=get_disp_name) is not None
-    assert find_index(l, "osmand/Jamaica_centralamerica_2", 
+    assert find_index(l, "osmand/Jamaica_centralamerica_2.obf", 
                       key=get_disp_name) is not None
-    assert find_index(l, "osmand/Monaco_europe_2", 
+    assert find_index(l, "osmand/Monaco_europe_2.obf", 
                       key=get_disp_name) is not None
     #Test the names of first & last file
-    assert l[0].disp_name == "osmand/Afghanistan_asia_2"
-    assert l[-1].disp_name == "osmand/zh_0"
+    assert l[0].disp_name == "osmand/Afghanistan_asia_2.obf"
+    assert l[-1].disp_name == "osmand/zh_0.voice"
     #Number of files must be in certain range.
     assert 500 < len(l) < 550
     
@@ -123,7 +123,7 @@ def test_OsmandDownloader_download_file():
     
     
 if __name__ == "__main__":
-#    test_OsmandDownloader_get_map_list()
-    test_OsmandDownloader_download_file()
+    test_OsmandDownloader_get_map_list()
+#    test_OsmandDownloader_download_file()
     
     pass
