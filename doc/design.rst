@@ -25,10 +25,10 @@ Sub-Commands
 lss
     List contents of servers.
 
-lsl
-    List locally stored files.
-
 lsd
+    List files that have been downloaded.
+
+lsm
     List files stored on mobile devices.
 
 install
