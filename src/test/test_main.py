@@ -49,6 +49,18 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
+def test_AppMain_list_server_maps():
+    "AppMain: test listing maps on remote servers"
+    from mobile_map_downloader.main import AppMain
+    
+    print "Start"
+    m = AppMain()
+    
+    m.list_server_maps([], long_form=True)
+    print 
+    m.list_server_maps(["osmand/France*", "osmand/Germany*"], long_form=False)
+    
+    
 def test_AppMain_parse_aguments():
     "AppMain: test parsing command line arguments"
     from mobile_map_downloader.main import AppMain
@@ -75,11 +87,12 @@ def test_AppMain_parse_aguments():
     assert arg_dict["long_form"] == True
     assert arg_dict["patterns"] == ["osmand/France*"]
     
-    m.parse_aguments(["-h"])
+#    m.parse_aguments(["-h"])
 #    m.parse_aguments(["lss", "-h"])
     
     
 if __name__ == "__main__":
-    test_AppMain_parse_aguments()
+    test_AppMain_list_server_maps()
+#    test_AppMain_parse_aguments()
     
     pass

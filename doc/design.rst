@@ -20,23 +20,26 @@ The exact handling of render styles, that are at least supplied by the
 OpenAndromaps project, is not yet determined.
 
 Sub-Commands
----------------
+---------------------------------------
 
-lss
+``lss``
     List contents of servers.
 
-lsd
+``lsd``
     List files that have been downloaded.
 
-lsm
+``lsm``
     List files stored on mobile devices.
 
-install
+``install``
     Install a map on the mobile device. Downloads the file from the internet
     (only) when needed, because it may be stored locally. 
 
-uninst 
+``uninst`` 
     Delete files on a mobile device.
+
+``rmd``
+    Delete downloaded files on the local file system. 
 
 
 Major Software components
@@ -59,4 +62,20 @@ Installer
     Installs maps on the mobile device. Knows the directory structure of the
     mobile map viewer program. There is one Installer for each map viewer 
     program.
+
+Listing and Filtering Files
+---------------------------------------
+
+Listing files and filtering filenames according to shell patterns, is important in several places in the top level component. 
+
+Text Rendering of File Lists (*TODO*)
+    There are three subcommands that create lists of files: 
+    ``lss``, ``lsd``, ``lsm``.
+    The common functionality of creating nicely formated text is implemented
+    in a special function.
+
+Creating and Filtering File Lists (*TODO*)
+   The commands ``install``, ``uninst``, ``rmd``, as well as the listing 
+   commands, need lists of files that are filtered with multiple patterns.
+
 

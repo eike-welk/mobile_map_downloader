@@ -61,9 +61,25 @@ def test_TextProgressBar():
         pb.update_val(v)
         time.sleep(1)
     pb.update_final(42, "Finished")
+
+
+def test_items_sorted():
+    """Test function items_sorted"""
+    from mobile_map_downloader.common import items_sorted
     
+    d = {"b":2, "a":1, "d":4, "c":3}
+    print d
+    ds = items_sorted(d)
+    print ds
     
+    assert ds[0] == ("a", 1)
+    assert ds[1] == ("b", 2)
+    assert ds[2] == ("c", 3)
+    assert ds[3] == ("d", 4)
+
+
 if __name__ == "__main__":
-    test_TextProgressBar()
+#    test_TextProgressBar()
+    test_items_sorted()
     
     pass

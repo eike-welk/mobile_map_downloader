@@ -30,11 +30,12 @@ from __future__ import absolute_import
 import time
 import argparse
 import sys
+import fnmatch
 
-from mobile_map_downloader.common import MapMeta
+from mobile_map_downloader.common import MapMeta, items_sorted
 from mobile_map_downloader.download import OsmandDownloader
-from mobile_map_downloader.local import OsmandManager
-from mobile_map_downloader.install import OsmandInstaller
+#from mobile_map_downloader.local import OsmandManager
+#from mobile_map_downloader.install import OsmandInstaller
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -44,11 +45,12 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 #Time stamps must be in UTC
 logging.Formatter.converter = time.gmtime
 
+
 class AppMain(object):
     """Us being good Java citizens. :-)"""
     def __init__(self):
         self.mobile_device = None
-        self.downloaders = {"osmand": OsmandDownloader}
+        self.downloaders = {"osmand": OsmandDownloader()}
 #        self.local_managers = [OsmandManager]
 #        self.installers = [OsmandInstaller]
     
@@ -56,15 +58,40 @@ class AppMain(object):
         """
         List maps that are on servers.
         """
+        downloaders = items_sorted(self.downloaders)
+        
         if not patterns:
-            for name in self.downloaders.keys():
-                print name
+            for name, downloader in downloaders:
+                maps = downloader.get_map_list()
+                size_total = 0
+                for map in maps:
+                    size_total += map.size
+                print "{name:<20} {n:>4} files, {size:3.1f} GiB".format(
+                            name=name, n=len(maps), size=size_total / 1024**3)
+                if long_form:
+                    print "    URL: {url}".format(url=downloader.list_url)
         else:
-            pass
-    
-    def do_nothing_func(self, **args):
-        pass
-
+            #Get listing of all maps of all servers.
+            all_maps = []
+            for _, downloader in downloaders:
+                maps = downloader.get_map_list()
+                all_maps += maps
+            #Filter the names for the patterns.
+            all_matches = []
+            for pattern in patterns:
+                all_matches += [m for m in all_maps 
+                               if fnmatch.fnmatchcase(m.disp_name, pattern)]
+            #Print the matches
+            size_total = 0
+            for match in all_matches:
+                print "{name:<65} {size:3.3f} Gib".format(
+                            name=match.disp_name, size=match.size / 1024**3)
+                size_total += match.size
+            print "-" * 79
+            print " " * 56 + "{n} files, {size:3.3f} GiB".format(
+                            n=len(all_matches), size=size_total / 1024**3)
+            
+            
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
@@ -76,10 +103,10 @@ class AppMain(object):
 #                                 "troubleshooting.")
         subparsers = parser.add_subparsers(
             dest="subcommand", title="Subcommands",
-            help='subcommands have an option "-h", for additional help')
+            help='all subcommands have an option "-h", for additional help')
         
         lss_parser = subparsers.add_parser(
-            "lss", help="list maps on remote servers",
+            "lss", help="list maps on servers on the Internet",
             description="list maps on servers on the Internet")
         lss_parser.add_argument("-l", "--long_form", action="store_true",
                                 help="display additional information")
@@ -98,7 +125,7 @@ class AppMain(object):
                         "patterns": args.patterns}
             return func, arg_dict
         else:
-            RuntimeError("Unrecognized subcommand, or missing subcommand.")
+            RuntimeError("Unrecognized subcommand.")
         
     def main(self):
         """

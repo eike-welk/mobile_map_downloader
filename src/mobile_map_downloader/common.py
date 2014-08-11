@@ -115,3 +115,14 @@ class TextProgressBar(object):
         
         self.num_backspace = None
         self.anim_frame_i = None
+        
+        
+def items_sorted(in_dict):
+    """
+    Create ``list`` or (key, value) pairs, from the contents of ``in_dict``.
+    The list is sorted by the dict's key.
+    """
+    items = in_dict.items()
+    items.sort(key=lambda i: i[0])
+    return items
+
