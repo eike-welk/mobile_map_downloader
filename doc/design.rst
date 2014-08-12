@@ -23,20 +23,32 @@ Sub-Commands
 ---------------------------------------
 
 ``lss``
-    List contents of servers.
+    List contents of servers. Option 
+    
+    * ``-l``, ``--long_form``: Show more information.
 
 ``lsd``
     List files that have been downloaded.
+    
+    * ``-l``, ``--long_form``: Show more information.
 
 ``lsm``
     List files stored on mobile devices.
+    
+    * ``-l``, ``--long_form``: Show more information.
 
 ``install``
     Install a map on the mobile device. Downloads the file from the internet
-    (only) when needed, because it may be stored locally. 
+    (only) when needed, because it may be stored locally. Options:
+
+    * ``-u``, ``--update``: Download the map when a newer version is available.
+    * ``-f``, ``--force_update``: Update all matching maps unconditionally.
 
 ``uninst`` 
-    Delete files on a mobile device.
+    Delete files on a mobile device. Options:
+
+    * ``-d``, ``delete_downloaded``: Delete maps also on local file system. 
+      Makes ``rmd`` command unnecessary.
 
 ``rmd``
     Delete downloaded files on the local file system. 

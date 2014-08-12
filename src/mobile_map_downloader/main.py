@@ -31,11 +31,13 @@ import time
 import argparse
 import sys
 import fnmatch
+import os.path as path
+import os
 
 from mobile_map_downloader.common import MapMeta, items_sorted
 from mobile_map_downloader.download import OsmandDownloader
-#from mobile_map_downloader.local import OsmandManager
-#from mobile_map_downloader.install import OsmandInstaller
+from mobile_map_downloader.local import OsmandManager
+from mobile_map_downloader.install import OsmandInstaller
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -46,52 +48,166 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 logging.Formatter.converter = time.gmtime
 
 
-class AppMain(object):
+class AppHighLevel(object):
+    """
+    High level operations of the program, that are not directly relates to the 
+    user interface.  
+    """
+    app_directory_choices = ["~/Downloads/mobile_map_downloader", 
+                             "~/mobile_map_downloader"]
+    def __init__(self):
+        self.app_directory = None
+        self.mobile_device = None
+        #Low level components
+        self.downloaders = {}
+        self.local_managers = {}
+        self.installers = {}
+
+    def create_low_level_components(self, app_directory = None, 
+                                    mobile_device = None):
+        """
+        Create low level components that do the real work. 
+        Must be called before the application can do anything useful.
+        
+        Some components need additional resources:
+        
+        * ``self.local_managers`` need a writable directory to store downloaded
+          files. Its path is in ``self.app_directory``. This function searches
+          for this directory, and create it when none is found.
+          
+        * ``self.installers`` need a path to a mobile device in 
+          ``self.mobile_device``. 
+        """
+        #Init with predefined values for more easy testing.
+        if app_directory:
+            self.app_directory = app_directory
+        if mobile_device:
+            self.mobile_device = mobile_device
+            
+        #Create the low level components
+        self.downloaders = {"osmand": OsmandDownloader()}
+        
+        if not self.find_app_directory():
+            self.create_app_directory()
+        if self.app_directory:
+            self.local_managers = {"osmand": OsmandManager(self.app_directory)}
+        else:
+            print "No writable download directory! No downloads are possible."
+            
+        if self.mobile_device:
+            self.installers = {"osmand": OsmandInstaller(self.mobile_device)}
+        else:
+            print "No mobile device!"
+        
+    def find_app_directory(self):
+        """
+        Find the directory of the program.
+        
+        Do this portably with:
+            https://pypi.python.org/pypi/appdirs/1.2.0
+        """
+        if self.app_directory:
+            return self.app_directory
+        for app_dir in self.app_directory_choices:
+            app_dir = path.expanduser(app_dir)
+            if path.isdir(app_dir):
+                self.app_directory = app_dir
+                return app_dir
+        return None
+        
+    def create_app_directory(self):
+        """Create a directory for the program."""
+        for app_dir in self.app_directory_choices:
+            app_dir = path.expanduser(app_dir)
+            root, _ = path.split(app_dir)
+            if path.isdir(root):
+                os.mkdir(app_dir)
+                self.app_directory = app_dir
+                return app_dir
+        return None
+        
+    def get_filtered_map_list(self, lister_dict, patterns):
+        """
+        Create a list of maps, that match certain patterns.
+        
+        Arguments
+        ----------
+        
+        lister_dict: dict[str:object]
+            Object must have a method ``get_map_list() -> [MapMeta]``.
+        
+        patterns: list[str]
+            List of shell wildcard patterns.
+            
+        Retuns
+        --------
+        
+        list[MapMeta]
+        """
+        #Get listing of all maps of all servers.
+        all_maps = []
+        for _, downloader in items_sorted(lister_dict):
+            maps = downloader.get_map_list()
+            all_maps += maps
+        #Filter the names for the patterns.
+        all_matches = []
+        for pattern in patterns:
+            all_matches += [map_ for map_ in all_maps 
+                            if fnmatch.fnmatchcase(map_.disp_name, pattern)]
+        return all_matches
+
+
+class ConsoleAppMain(object):
     """Us being good Java citizens. :-)"""
     def __init__(self):
-        self.mobile_device = None
-        self.downloaders = {"osmand": OsmandDownloader()}
-#        self.local_managers = [OsmandManager]
-#        self.installers = [OsmandInstaller]
-    
+        self.app = AppHighLevel()
+         
+    def print_summary_list(self, lister_dict, long_form):
+        """
+        Print a summary list of maps.
+        
+        * lister_dict: dict[str:object]
+        * long_form: bool
+        """
+        for name, lister in items_sorted(lister_dict):
+            maps = lister.get_map_list()
+            size_total = 0
+            for map_ in maps:
+                size_total += map_.size
+            print "{name:<20} {n:>4} files, {size:3.1f} GiB".format(
+                        name=name, n=len(maps), size=size_total / 1024**3)
+            if long_form:
+                try:
+                    print "    URL: {url}".format(url=lister.list_url)
+                except AttributeError:
+                    pass
+
+    def print_regular_list(self, lister_dict, patterns):
+        """
+        Print regular list of maps.
+        
+        * lister_dict: dict[str:object]
+        * patterns: list[str]
+         """
+        maps = self.app.get_filtered_map_list(lister_dict, patterns)
+        size_total = 0
+        for map_ in maps:
+            print "{name:<65} {size:3.3f} Gib".format(
+                        name=map_.disp_name, size=map_.size / 1024**3)
+            size_total += map_.size
+        print "-" * 79
+        print " " * 56 + "{num} files, {size:3.3f} GiB".format(
+                        num=len(maps), size=size_total / 1024**3)
+
     def list_server_maps(self, patterns=None, long_form=False):
         """
-        List maps that are on servers.
+        List maps that are on servers. Performs ``lss`` subcommand.
         """
-        downloaders = items_sorted(self.downloaders)
-        
         if not patterns:
-            for name, downloader in downloaders:
-                maps = downloader.get_map_list()
-                size_total = 0
-                for map in maps:
-                    size_total += map.size
-                print "{name:<20} {n:>4} files, {size:3.1f} GiB".format(
-                            name=name, n=len(maps), size=size_total / 1024**3)
-                if long_form:
-                    print "    URL: {url}".format(url=downloader.list_url)
+            self.print_summary_list(self.app.downloaders, long_form)
         else:
-            #Get listing of all maps of all servers.
-            all_maps = []
-            for _, downloader in downloaders:
-                maps = downloader.get_map_list()
-                all_maps += maps
-            #Filter the names for the patterns.
-            all_matches = []
-            for pattern in patterns:
-                all_matches += [m for m in all_maps 
-                               if fnmatch.fnmatchcase(m.disp_name, pattern)]
-            #Print the matches
-            size_total = 0
-            for match in all_matches:
-                print "{name:<65} {size:3.3f} Gib".format(
-                            name=match.disp_name, size=match.size / 1024**3)
-                size_total += match.size
-            print "-" * 79
-            print " " * 56 + "{n} files, {size:3.3f} GiB".format(
-                            n=len(all_matches), size=size_total / 1024**3)
-            
-            
+            self.print_regular_list(self.app.downloaders, patterns)
+
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
@@ -117,7 +233,7 @@ class AppMain(object):
         args = parser.parse_args(cmd_args)
         print args
         
-        self.mobile_device = args.mobile_device
+        self.app.mobile_device = args.mobile_device
         
         if args.subcommand == "lss":
             func = self.list_server_maps
@@ -132,4 +248,5 @@ class AppMain(object):
         The program's main method.
         """
         func, arg_dict = self.parse_aguments(sys.argv[1:])
-        func(**arg_dict)
+        self.app.create_low_level_components()
+        func(**arg_dict) #IGNORE:W0142

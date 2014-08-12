@@ -49,24 +49,43 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
-def test_AppMain_list_server_maps():
-    "AppMain: test listing maps on remote servers"
-    from mobile_map_downloader.main import AppMain
+def test_AppHighLevel_get_filtered_map_list():
+    "AppHighLevel: test get_filtered_map_list()"
+    from mobile_map_downloader.main import AppHighLevel
     
     print "Start"
-    m = AppMain()
+    a = AppHighLevel()
+    a.create_low_level_components(
+                        app_directory=relative_path("../../test_data/maps"))
+    
+    maps = a.get_filtered_map_list(a.local_managers, "*")
+    
+    pprint(maps)
+    assert len(maps) == 2
+    assert maps[0].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
+    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf" 
+    
+    
+def test_ConsoleAppMain_list_server_maps():
+    "ConsoleAppMain: test listing maps on remote servers"
+    from mobile_map_downloader.main import ConsoleAppMain
+    
+    print "Start"
+    m = ConsoleAppMain()
+    m.app.create_low_level_components(
+                        app_directory=relative_path("../../test_data/maps"))
     
     m.list_server_maps([], long_form=True)
     print 
     m.list_server_maps(["osmand/France*", "osmand/Germany*"], long_form=False)
     
     
-def test_AppMain_parse_aguments():
-    "AppMain: test parsing command line arguments"
-    from mobile_map_downloader.main import AppMain
+def test_ConsoleAppMain_parse_aguments():
+    "ConsoleAppMain: test parsing command line arguments"
+    from mobile_map_downloader.main import ConsoleAppMain
     
     print "Start"
-    m = AppMain()
+    m = ConsoleAppMain()
     
     func, arg_dict = m.parse_aguments(["lss", "-l"])
     assert func == m.list_server_maps
@@ -82,7 +101,7 @@ def test_AppMain_parse_aguments():
     assert arg_dict["patterns"] == ["osmand/France*", "osmand/Germany*"]
     
     func, arg_dict = m.parse_aguments(["-m", "/media/foobar", "lss", "-l", "osmand/France*"])
-    assert m.mobile_device == "/media/foobar"
+    assert m.app.mobile_device == "/media/foobar"
     assert func == m.list_server_maps
     assert arg_dict["long_form"] == True
     assert arg_dict["patterns"] == ["osmand/France*"]
@@ -92,7 +111,8 @@ def test_AppMain_parse_aguments():
     
     
 if __name__ == "__main__":
-    test_AppMain_list_server_maps()
-#    test_AppMain_parse_aguments()
+    test_AppHighLevel_get_filtered_map_list()
+#    test_ConsoleAppMain_list_server_maps()
+#    test_ConsoleAppMain_parse_aguments()
     
     pass
