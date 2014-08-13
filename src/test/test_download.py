@@ -111,6 +111,7 @@ def test_OsmandDownloader_download_file():
 #    url = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
     #File size 3.0 MiB
     url = "http://download.osmand.net/download.php?standard=yes&file=Jamaica_centralamerica_2.obf.zip"
+#    url = "http://download.osmand.net/list.php/download.php?standard=yes&file=France_alsace_europe_2.obf.zip"
     
     d = OsmandDownloader()
     d.download_file(url, test_map_name, "test-file-name.foo")
@@ -123,7 +124,7 @@ def test_OsmandDownloader_download_file():
     
     
 if __name__ == "__main__":
-    test_OsmandDownloader_get_map_list()
-#    test_OsmandDownloader_download_file()
+#    test_OsmandDownloader_get_map_list()
+    test_OsmandDownloader_download_file()
     
     pass

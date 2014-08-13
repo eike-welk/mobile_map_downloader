@@ -41,7 +41,7 @@ logging.Formatter.converter = time.gmtime
 
 
 MapMeta = namedtuple("MapMeta", 
-                     "disp_name, full_name, size, date, description, map_type")
+                     "disp_name, full_name, size, time, description, map_type")
 #Some meta data about each map
 #    map_type: "osmand" | "mapsforge"
 

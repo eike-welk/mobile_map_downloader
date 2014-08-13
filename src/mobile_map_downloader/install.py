@@ -103,7 +103,7 @@ class OsmandInstaller(object):
             map_meta = MapMeta(disp_name=disp_name, 
                                full_name=map_name, 
                                size=map_size, 
-                               date=datetime.datetime.fromtimestamp(mod_time), 
+                               time=datetime.datetime.fromtimestamp(mod_time), 
                                description="", 
                                map_type="osmand")
             map_metas.append(map_meta)
@@ -111,44 +111,43 @@ class OsmandInstaller(object):
         return map_metas
     
     
-    def install_map(self, extractor, sd_path, disp_name, size_total):
-        """
-        Install one map file in Osmand's directory on the SD card.
-        
-        Arguments
-        ---------
-        
-        extractor: file like object
-            An object that extracts the map from the zip archive. It behaves
-            like a file.
-        
-        sd_path: str
-            Path of the map on the mobile device's SD card.
-        
-        disp_name: str
-            Canonical name of the map. Used in the progress bar.
-            
-        size_total: int [Bytes]
-            The size of the map, uncompressed.
-        """
-        size_mib = round(size_total / 1024**2, 1)
-        msg = "{name} : {size} MiB".format(name=disp_name[0:50], size=size_mib)
-        progress = TextProgressBar(msg, val_max=size_total)
-        progress.update_val(0)
-        
-        fsdcard = open(sd_path, "wb")
-        
-        buff_size = 1024**2 * 10
-        size_down = 0
-        while True:
-            progress.update_val(size_down)
-            buf = extractor.read(buff_size)
-            if not buf:
-                break
-            fsdcard.write(buf)
-            size_down += len(buf)
-            
-        fsdcard.close()
-        progress.update_final(size_down, "Installed")
-
+#    def install_map(self, extractor, sd_path, disp_name, size_total):
+#        """
+#        Install one map file in Osmand's directory on the SD card.
+#        
+#        Arguments
+#        ---------
+#        
+#        extractor: file like object
+#            An object that extracts the map from the zip archive. It behaves
+#            like a file.
+#        
+#        sd_path: str
+#            Path of the map on the mobile device's SD card.
+#        
+#        disp_name: str
+#            Canonical name of the map. Used in the progress bar.
+#            
+#        size_total: int [Bytes]
+#            The size of the map, uncompressed.
+#        """
+#        size_mib = round(size_total / 1024**2, 1)
+#        msg = "{name} : {size} MiB".format(name=disp_name[0:50], size=size_mib)
+#        progress = TextProgressBar(msg, val_max=size_total)
+#        progress.update_val(0)
+#        
+#        fsdcard = open(sd_path, "wb")
+#        
+#        buff_size = 1024**2 * 10
+#        size_down = 0
+#        while True:
+#            progress.update_val(size_down)
+#            buf = extractor.read(buff_size)
+#            if not buf:
+#                break
+#            fsdcard.write(buf)
+#            size_down += len(buf)
+#            
+#        fsdcard.close()
+#        progress.update_final(size_down, "Installed")
         

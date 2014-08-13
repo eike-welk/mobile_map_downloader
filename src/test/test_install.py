@@ -67,32 +67,32 @@ def test_OsmandInstaller_get_map_list():
     assert l[1].size == 342685
 
     
-def test_OsmandInstaller_install_map():
-    "OsmandInstaller: Install one map file."
-    from mobile_map_downloader.install import OsmandInstaller  
-    from mobile_map_downloader.local import OsmandManager
-    
-    download_dir = relative_path("../../test_data/maps/")
-    archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
-    device_dir = relative_path("../../test_tmp/TEST-DEVICE1")    
-    map_path =   relative_path("../../test_tmp/TEST-DEVICE1/osmand/Jamaica_centralamerica_2.obf")
-
-    #Remove old output directory, and create new empty output directory
-    shutil.rmtree(device_dir, ignore_errors=True)
-    os.makedirs(path.join(device_dir, "osmand"))
-    
-    m = OsmandManager(download_dir)
-    i = OsmandInstaller(device_dir)
-    extractor, size_total, _ = m.get_map_extractor(archive_path)
-    i.install_map(extractor, map_path, "osmand/Jamaica_centralamerica_2", size_total)
-    
-    print "path.getsize(archive_path):", path.getsize(map_path)
-    assert path.isfile(map_path)
-    assert path.getsize(map_path) == 4518034
+#def test_OsmandInstaller_install_map():
+#    "OsmandInstaller: Install one map file."
+#    from mobile_map_downloader.install import OsmandInstaller  
+#    from mobile_map_downloader.local import OsmandManager
+#    
+#    download_dir = relative_path("../../test_data/maps/")
+#    archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
+#    device_dir = relative_path("../../test_tmp/TEST-DEVICE1")    
+#    map_path =   relative_path("../../test_tmp/TEST-DEVICE1/osmand/Jamaica_centralamerica_2.obf")
+#
+#    #Remove old output directory, and create new empty output directory
+#    shutil.rmtree(device_dir, ignore_errors=True)
+#    os.makedirs(path.join(device_dir, "osmand"))
+#    
+#    m = OsmandManager(download_dir)
+#    i = OsmandInstaller(device_dir)
+#    extractor, size_total, _ = m.get_map_extractor(archive_path)
+#    i.install_map(extractor, map_path, "osmand/Jamaica_centralamerica_2", size_total)
+#    
+#    print "path.getsize(archive_path):", path.getsize(map_path)
+#    assert path.isfile(map_path)
+#    assert path.getsize(map_path) == 4518034
     
 
 if __name__ == "__main__":
 #    test_OsmandInstaller_get_map_list()
-    test_OsmandInstaller_install_map()
+#    test_OsmandInstaller_install_map()
     
     pass

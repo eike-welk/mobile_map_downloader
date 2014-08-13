@@ -119,7 +119,7 @@ class OsmandDownloader(object):
             map_meta = MapMeta(disp_name=self.make_disp_name(link.text), 
                                full_name=self.list_url + link.get("href"), 
                                size=float(row[2].text) * 1024**2, #[Byte]
-                               date=dateutil.parser.parse(row[1].text), 
+                               time=dateutil.parser.parse(row[1].text), 
                                description=row[3].text, 
                                map_type="osmand")
             map_metas.append(map_meta)
@@ -143,7 +143,6 @@ class OsmandDownloader(object):
             
         loc_name: str
             Name of the file in the local file system.
-            TODO: remove argument, compute ``loc_name`` from ``disp_name``
             
         disp_name: str 
             File name for display in the progress bar.

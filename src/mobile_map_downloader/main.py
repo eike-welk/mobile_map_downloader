@@ -63,6 +63,7 @@ class AppHighLevel(object):
         self.local_managers = {}
         self.installers = {}
 
+    #--- Initialization
     def create_low_level_components(self, app_directory = None, 
                                     mobile_device = None):
         """
@@ -98,7 +99,11 @@ class AppHighLevel(object):
             self.installers = {"osmand": OsmandInstaller(self.mobile_device)}
         else:
             print "No mobile device!"
-        
+            
+    #TODO: find mobile devices. Recipe:
+    #    http://stackoverflow.com/questions/12672981/python-os-independent-list-of-available-storage-devices
+    #    http://stackoverflow.com/questions/24913655/how-to-get-mounted-on-in-python-for-external-devices
+    
     def find_app_directory(self):
         """
         Find the directory of the program.
@@ -126,15 +131,23 @@ class AppHighLevel(object):
                 return app_dir
         return None
         
+    #--- Information Retrieval 
     def get_filtered_map_list(self, lister_dict, patterns):
         """
         Create a list of maps, that match certain patterns.
+        
+        Usage::
+            
+            app = AppHighLevel()
+            app.create_low_level_components()
+            maps = app.get_filtered_map_list(app.downloaders, ["*France*"])
+            pprint(maps)
         
         Arguments
         ----------
         
         lister_dict: dict[str:object]
-            Object must have a method ``get_map_list() -> [MapMeta]``.
+            Objects must have a method ``get_map_list() -> [MapMeta]``.
         
         patterns: list[str]
             List of shell wildcard patterns.
@@ -155,6 +168,84 @@ class AppHighLevel(object):
             all_matches += [map_ for map_ in all_maps 
                             if fnmatch.fnmatchcase(map_.disp_name, pattern)]
         return all_matches
+
+    #--- File manipulation
+    def download_file(self, file_meta):
+        """Download a file from the Internet to the local file system."""
+        disp_name = file_meta.disp_name
+        comp_name, _ = path.split(disp_name)
+        dl_component = self.downloaders[comp_name]
+        lo_component = self.local_managers[comp_name]
+        lo_path = lo_component.make_full_name(disp_name)
+        dl_component.download_file(srv_url=file_meta.full_name, 
+                                   loc_name=lo_path, 
+                                   disp_name=disp_name)
+        
+    def install_file(self, file_meta):
+        """Install a file from the local file system on the mobile device."""
+        disp_name = file_meta.disp_name
+        comp_name, _ = path.split(disp_name)
+        loca_component = self.local_managers[comp_name]
+        inst_component = self.installers[comp_name]
+        inst_path = inst_component.make_full_name(disp_name)
+        loca_component.extract_map(arch_path=file_meta.full_name, 
+                                   ext_path=inst_path, 
+                                   disp_name=disp_name)
+        
+    def plan_work(self, source_files, dest_files, mode):
+        """
+        Compute which files should be downloaded or installed.
+        """
+        supported_modes = ["only_missing", "replace_newer", "replace_all"]
+        if mode not in supported_modes:
+            raise ValueError("Unsupported mode: {}".format(mode))
+        
+        if mode == "replace_all":
+            return source_files[:]
+        
+        dest_dict = {file_.disp_name: file_ for file_ in dest_files}
+        work_files = []
+        for source_file in source_files:
+            #If there **is no** local map with this name, download it.
+            if source_file.disp_name not in dest_dict:
+                work_files.append(source_file)
+                continue
+            if mode == "replace_newer":
+                #If there is a local map with this name, 
+                #download it if map on server **is newer**.
+                dest_file = dest_dict[source_file.disp_name]
+                if source_file.time > dest_file.time:
+                    work_files.append(source_file)
+        
+        return work_files
+        
+    def download_install(self, patterns, mode):
+        """
+        Download and install maps that match certain patterns. 
+        """
+        #Download maps
+        srv_maps = self.get_filtered_map_list(self.downloaders, patterns)
+        loc_maps = self.get_filtered_map_list(self.local_managers, patterns)
+        down_maps = self.plan_work(srv_maps, loc_maps, mode)
+        down_size = 0
+        for map_ in down_maps:
+            down_size += map_.size
+        print "Downloading: {n} files, {s} GiB".format(n=len(down_maps), 
+                                                       s=down_size / 1024**3)
+        for map_ in down_maps:
+            self.download_file(map_)
+        
+        #Install maps
+        loc_maps = self.get_filtered_map_list(self.local_managers, patterns)
+        dev_maps = self.get_filtered_map_list(self.installers, patterns)
+        inst_maps = self.plan_work(loc_maps, dev_maps, mode)
+        inst_size = 0
+        for map_ in inst_maps:
+            inst_size += map_.size
+        print "Installing: {n} files, {s} GiB".format(n=len(inst_maps), 
+                                                      s=inst_size / 1024**3)
+        for map_ in inst_maps:
+            self.install_file(map_)
 
 
 class ConsoleAppMain(object):
@@ -211,7 +302,7 @@ class ConsoleAppMain(object):
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
-                            "Download and install maps for mobile devices.")
+                            "Download and download_install maps for mobile devices.")
         parser.add_argument("-m", "--mobile_device", metavar="DIR",
                             help="directory that represents the mobile device")
 #        parser.add_argument("-v", "--verbose", action="store_true",

@@ -32,6 +32,8 @@ from __future__ import absolute_import
 
 import time
 import os.path as path
+import os
+import shutil
 from pprint import pprint
 import datetime
 
@@ -48,10 +50,30 @@ def relative_path(*path_comps):
     "Create file paths that are relative to the location of this file."
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
+def create_writable_test_dirs(idx):
+    """
+    Create temporary writable directories with test data. Different names 
+    for each test enable parallel execution of tests.
     
-def test_OsmandManager_get_map_list():
-    "Test class OsmandManager: Extracting maps from downloaded archives."
-#    #Create the test data
+    The following directories are created:
+    
+    "../../test_tmp/mobile_map_downloader" + idx 
+        Application directory with test data.
+        
+    "../../test_tmp/TEST-DEVICE" + idx
+        Device directory  with test data.
+    """
+    idx = str(idx)
+    test_app_dir = relative_path("../../test_tmp/mobile_map_downloader" + idx)
+    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
+    shutil.rmtree(test_app_dir, ignore_errors=True)
+    shutil.rmtree(test_dev_dir, ignore_errors=True)
+    shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
+    shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
+    return test_app_dir, test_dev_dir
+
+#def download_test_data():
+#    "Download some test data"
 #    #    #File size 0.2 MiB
 #    from mobile_map_downloader.download import OsmandDownloader
 #    d = OsmandDownloader()
@@ -62,6 +84,10 @@ def test_OsmandManager_get_map_list():
 #    srvname = "http://download.osmand.net/download.php?standard=yes&file=Jamaica_centralamerica_2.obf.zip"
 #    locname = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
 #    d.download_file(srvname, locname, "osmand/Jamaica_centralamerica_2")
+
+
+def test_OsmandManager_get_map_list():
+    "Test class OsmandManager: Extracting maps from downloaded archives."
 
     from mobile_map_downloader.local import OsmandManager
     download_dir = relative_path("../../test_data/maps/")
@@ -96,30 +122,30 @@ def test_OsmandManager_get_map_extractor():
     assert len(buf) == size_total
     assert mod_time == datetime.datetime(2014, 8, 3, 15, 10, 2)
 
+
+def test_OsmandManager_extract_map():
+    "Test class OsmandManager: Extracting maps from downloaded archives."
+    from mobile_map_downloader.local import OsmandManager
     
-#def test_OsmandManager_prepare_map():
-#    "Test class OsmandManager: Extracting maps from downloaded archives."
-#    from mobile_map_downloader.local import OsmandManager
-#    
-#    print "Start prepare map."
-#    in_name = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
-#    out_name = relative_path("../../test_tmp/Jamaica_centralamerica_2.obf.zip")
-#    try: os.remove(out_name)
-#    except: pass
-#    
-#    m = OsmandManager("foo")
-#    m.prepare_map(in_name, out_name, "osmand/Jamaica_centralamerica_2")
-#    
-#    #Test name and size of extracted file
-#    assert path.isfile(out_name)
-#    file_size = path.getsize(out_name)/1024**2
-#    print "file size [MiB]:", file_size
-#    assert round(file_size, 1) == 4.3
+    print "Start prepare map."
+    test_app_dir, test_dev_dir = create_writable_test_dirs("l3")
+    inp_name = path.join(test_app_dir, "osmand/Jamaica_centralamerica_2.obf.zip")
+    out_name = path.join(test_dev_dir, "osmand/Jamaica_centralamerica_2.obf")
+    os.remove(out_name)
     
+    m = OsmandManager(test_app_dir)
+    m.extract_map(inp_name, out_name, "osmand/Jamaica_centralamerica_2")
     
+    #Test name and size of extracted file
+    assert path.isfile(out_name)
+    file_size = path.getsize(out_name)
+    print "file size [MiB]:", file_size / 1024**2
+    assert file_size == 4518034
+    
+
 if __name__ == "__main__":
 #    test_OsmandManager_get_map_list()
-    test_OsmandManager_get_map_extractor()
-#    test_OsmandManager_prepare_map()
+#    test_OsmandManager_get_map_extractor()
+    test_OsmandManager_extract_map()
     
     pass

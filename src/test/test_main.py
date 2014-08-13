@@ -33,6 +33,7 @@ from __future__ import absolute_import
 import time
 import os
 import os.path as path
+import shutil
 from pprint import pprint
 
 
@@ -49,23 +50,157 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
+def create_writable_test_dirs(idx):
+    """
+    Create temporary writable directories with test data. Different names 
+    for each test enable parallel execution of tests.
+    
+    The following directories are created:
+    
+    "../../test_tmp/mobile_map_downloader" + idx 
+        Application directory with test data.
+        
+    "../../test_tmp/TEST-DEVICE" + idx
+        Device directory  with test data.
+    """
+    idx = str(idx)
+    test_app_dir = relative_path("../../test_tmp/mobile_map_downloader" + idx)
+    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
+    shutil.rmtree(test_app_dir, ignore_errors=True)
+    shutil.rmtree(test_dev_dir, ignore_errors=True)
+    shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
+    shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
+    return test_app_dir, test_dev_dir
+    
+
 def test_AppHighLevel_get_filtered_map_list():
     "AppHighLevel: test get_filtered_map_list()"
     from mobile_map_downloader.main import AppHighLevel
     
     print "Start"
-    a = AppHighLevel()
-    a.create_low_level_components(
-                        app_directory=relative_path("../../test_data/maps"))
+    app = AppHighLevel()
+    app.create_low_level_components(
+                app_directory=relative_path("../../test_data/maps"),
+                mobile_device=relative_path("../../test_data/TEST-DEVICE1"))
     
-    maps = a.get_filtered_map_list(a.local_managers, "*")
+    #List maps on remote servers whose names contain the word "Monaco".
+    maps = app.get_filtered_map_list(app.downloaders, ["*Monaco*"])
+    pprint(maps)
+    assert len(maps) == 1
+    assert maps[0].disp_name == "osmand/Monaco_europe_2.obf"
+    assert maps[0].full_name.find("download.osmand.net") > 0
     
+    #List all locally downloaded maps.
+    maps = app.get_filtered_map_list(app.local_managers, ["*"])
     pprint(maps)
     assert len(maps) == 2
     assert maps[0].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
-    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf" 
+    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf"
+    assert maps[0].full_name.find("test_data/maps") > 0
+    
+    #List all maps that are installed on the current device.
+    maps = app.get_filtered_map_list(app.installers, ["*"])
+    pprint(maps)
+    assert len(maps) == 2
+    assert maps[0].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
+    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf"
+    assert maps[0].full_name.find("test_data/TEST-DEVICE1") > 0
+    
+
+def test_AppHighLevel_plan_work():
+    "AppHighLevel: test plan_work"
+    from datetime import datetime
+    from mobile_map_downloader.common import MapMeta
+    from mobile_map_downloader.main import AppHighLevel
+    
+    print "Start"
+    #Create source and destination lists
+    src = [MapMeta("map1", "f/map1", 1, datetime(2000, 1, 1), "foo", "bar"),
+           MapMeta("map2", "f/map2", 1, datetime(2000, 1, 1), "foo", "bar"),
+           MapMeta("map3", "f/map3", 1, datetime(2000, 1, 1), "foo", "bar")]
+    dst = [MapMeta("map1", "f/map1", 1, datetime(2000, 1, 1), "foo", "bar"),
+           MapMeta("map2", "f/map2", 1, datetime(1999, 1, 1), "foo", "bar")]
+    
+    app = AppHighLevel()
+    
+    work = app.plan_work(src, dst, "only_missing")
+    pprint(work)
+    assert len(work) == 1
+    assert work[0].disp_name == "map3"
+    
+    work = app.plan_work(src, dst, "replace_newer")
+    pprint(work)
+    assert len(work) == 2
+    assert work[0].disp_name == "map2"
+    assert work[1].disp_name == "map3"
+    
+    work = app.plan_work(src, dst, "replace_all")
+    pprint(work)
+    assert len(work) == 3
+
+    
+def test_AppHighLevel_download_file():
+    "AppHighLevel: test download_file()"
+    from mobile_map_downloader.main import AppHighLevel
+    from mobile_map_downloader.common import MapMeta
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m1")    
+    file_meta = MapMeta(disp_name="osmand/Cape-verde_africa_2.obf", 
+                        full_name="http://download.osmand.net/download.php?standard=yes&file=Cape-verde_africa_2.obf.zip", 
+                        size=None, time=None, description=None, map_type=None)
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.download_file(file_meta)
+    
+    assert path.isfile(path.join(app_directory, 
+                                 "osmand/Cape-verde_africa_2.obf.zip"))
     
     
+def test_AppHighLevel_install_file():
+    "AppHighLevel: test install_file()"
+    from mobile_map_downloader.main import AppHighLevel
+    from mobile_map_downloader.common import MapMeta
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m2")
+    file_meta = MapMeta(disp_name="osmand/Jamaica_centralamerica_2.obf", 
+                        full_name=path.join(
+                                    app_directory, 
+                                    "osmand/Jamaica_centralamerica_2.obf.zip"), 
+                        size=None, time=None, description=None, map_type=None)
+    #Remove file that will be created though install algorithm
+    os.remove(path.join(mobile_device, "osmand/Jamaica_centralamerica_2.obf"))
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.install_file(file_meta)
+    
+    assert path.isfile(path.join(mobile_device, 
+                                 "osmand/Jamaica_centralamerica_2.obf"))
+    
+    
+def test_AppHighLevel_download_install():
+    "AppHighLevel: test get_filtered_map_list()"
+    from mobile_map_downloader.main import AppHighLevel
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m3")
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.download_install(["*Monaco*", "*France_alsace*"], mode="only_missing")
+    
+    assert path.isfile(path.join(app_directory, "osmand", 
+                                 "France_alsace TODO:comlpete name"))
+    assert path.isfile(path.join(mobile_device, "osmand", 
+                                 "France_alsace TODO:comlpete name"))
+    
+
 def test_ConsoleAppMain_list_server_maps():
     "ConsoleAppMain: test listing maps on remote servers"
     from mobile_map_downloader.main import ConsoleAppMain
@@ -111,7 +246,11 @@ def test_ConsoleAppMain_parse_aguments():
     
     
 if __name__ == "__main__":
-    test_AppHighLevel_get_filtered_map_list()
+#    test_AppHighLevel_get_filtered_map_list()
+#    test_AppHighLevel_download_file()
+#    test_AppHighLevel_install_file()
+#    test_AppHighLevel_plan_work()
+    test_AppHighLevel_download_install()
 #    test_ConsoleAppMain_list_server_maps()
 #    test_ConsoleAppMain_parse_aguments()
     

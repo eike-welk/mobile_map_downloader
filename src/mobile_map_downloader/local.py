@@ -34,7 +34,7 @@ from os import path
 import zipfile
 import datetime
 
-from mobile_map_downloader.common import MapMeta
+from mobile_map_downloader.common import MapMeta, TextProgressBar
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -102,7 +102,7 @@ class OsmandManager(object):
             map_meta = MapMeta(disp_name=disp_name, 
                                full_name=archive_name, 
                                size=size_total, 
-                               date=date_time, 
+                               time=date_time, 
                                description="", 
                                map_type="osmand")
             map_metas.append(map_meta)
@@ -143,4 +143,41 @@ class OsmandManager(object):
         
         return fzip, size_total, mod_time
         
+    def extract_map(self, arch_path, ext_path, disp_name):
+        """
+        Extract an Osmand map from its downloaded archive.
         
+        Arguments
+        ---------
+        
+        arch_path: str
+            Path of the archive that contains the map.
+        
+        ext_path: str
+            Path where the extracted map should be stored. For example
+            a mobile device's SD card.
+        
+        disp_name: str
+            Canonical name of the map. Used in the progress bar.
+        """
+        fext = open(ext_path, "wb")
+        fzip, size_total, _ = self.get_map_extractor(arch_path)
+        
+        size_mib = round(size_total / 1024**2, 1)
+        msg = "{name} : {size} MiB".format(name=disp_name[0:50], size=size_mib)
+        progress = TextProgressBar(msg, val_max=size_total)
+        progress.update_val(0)
+        
+        buff_size = 1024**2 * 10
+        size_down = 0
+        while True:
+            progress.update_val(size_down)
+            buf = fzip.read(buff_size)
+            if not buf:
+                break
+            fext.write(buf)
+            size_down += len(buf)
+            
+        fext.close()
+        progress.update_final(size_down, "Installed")
+
