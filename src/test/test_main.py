@@ -193,12 +193,12 @@ def test_AppHighLevel_download_install():
     app = AppHighLevel()
     app.create_low_level_components(app_directory, mobile_device)
     
-    app.download_install(["*Monaco*", "*France_alsace*"], mode="only_missing")
+    app.download_install(["*Monaco*", "*Faroe-islands*"], mode="only_missing")
     
     assert path.isfile(path.join(app_directory, "osmand", 
-                                 "France_alsace TODO:comlpete name"))
+                                 "Faroe-islands_europe_2.obf.zip"))
     assert path.isfile(path.join(mobile_device, "osmand", 
-                                 "France_alsace TODO:comlpete name"))
+                                 "Faroe-islands_europe_2.obf"))
     
 
 def test_ConsoleAppMain_list_server_maps():

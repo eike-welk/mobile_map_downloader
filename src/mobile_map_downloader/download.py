@@ -31,6 +31,7 @@ import time
 import urllib2
 import lxml.html
 import dateutil.parser
+import urlparse
 
 from mobile_map_downloader.common import MapMeta
 from mobile_map_downloader.common import TextProgressBar
@@ -116,8 +117,9 @@ class OsmandDownloader(object):
         map_metas = []
         for row in table[2:]:
             link = row[0][0]
+            download_url = urlparse.urljoin(self.list_url, link.get("href"))
             map_meta = MapMeta(disp_name=self.make_disp_name(link.text), 
-                               full_name=self.list_url + link.get("href"), 
+                               full_name=download_url, 
                                size=float(row[2].text) * 1024**2, #[Byte]
                                time=dateutil.parser.parse(row[1].text), 
                                description=row[3].text, 
