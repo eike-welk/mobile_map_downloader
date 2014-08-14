@@ -52,11 +52,11 @@ class OsmandInstaller(object):
     """
     def __init__(self, device_dir):
 #        self.device_dir = device_dir
-        self.osmand_dir = path.join(device_dir, "osmand")
+        self.install_dir = path.join(device_dir, "osmand")
         
         #Create Osmand directory, if it does not exist.
-        if not path.exists(self.osmand_dir):
-            os.mkdir(self.osmand_dir)
+        if not path.exists(self.install_dir):
+            os.mkdir(self.install_dir)
     
     def make_disp_name(self, file_name_path):
         """
@@ -76,7 +76,7 @@ class OsmandInstaller(object):
         Create a path to a locally stored map from its canonical name. 
         """
         _, fname = path.split(disp_name)
-        full_name = path.join(self.osmand_dir, fname)
+        full_name = path.join(self.install_dir, fname)
         return full_name
     
     def get_map_list(self):
@@ -90,13 +90,13 @@ class OsmandInstaller(object):
         
         list[MapMeta]
         """
-        dir_names = os.listdir(self.osmand_dir)
+        dir_names = os.listdir(self.install_dir)
         map_names = fnmatch.filter(dir_names, "*.obf")
         map_names.sort()
         
         map_metas = []
         for name in map_names:
-            map_name = path.join(self.osmand_dir, name)
+            map_name = path.join(self.install_dir, name)
             disp_name = self.make_disp_name(name)
             map_size = path.getsize(map_name)
             mod_time = path.getmtime(map_name)

@@ -16,10 +16,10 @@ The program currently only supports **OsmAnd**:
     
     http://osmand.net/
 
-The program is written in the **Python** programming language, version **2.7**.
-Contributions of code are very welcome. The program has currently only been
-tested on **Linux**. It uses however no Linux specific functionality, so
-porting to other operating systems should be easy. 
+If you find any **errors**, or if you have good ideas for the program,
+please put them into the projects **issue tracker**:
+
+   https://github.com/eike-welk/mobile_map_downloader/issues 
 
 
 Installation
@@ -29,8 +29,8 @@ Open a terminal, get administrator/root privileges and type::
     
     pip install mobile-map-download --pre -U
 
-Alternatively you can install the program with **Virtualenv**. With Virtualenv you
-don't need root privileges, and can delete the program from your computer
+Alternatively you can install the program with **Virtualenv**. With Virtualenv
+you don't need root privileges, and can delete the program from your computer
 without a trace::
     
     virtualenv virtualenv/  #can use any name for the directory
@@ -60,4 +60,21 @@ changing set of features has to be taken from it::
 Each subcommand has its own help message::
 
     dlmap install -h
+
+
+Development
+=======================================
+
+The program is written in the **Python** programming language, version **2.7**.
+Contributions of code are very welcome. The program has currently only been
+tested on **Linux**. It uses however no Linux specific functionality, so
+porting to other operating systems should be easy. 
+
+Development is coordinated on Github:
+
+    https://github.com/eike-welk/mobile_map_downloader
+
+The **issue tracker** for errors and good ideas is here:
+
+   https://github.com/eike-welk/mobile_map_downloader/issues 
 

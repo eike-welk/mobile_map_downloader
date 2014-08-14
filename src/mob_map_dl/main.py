@@ -53,8 +53,8 @@ class AppHighLevel(object):
     High level operations of the program, that are not directly relates to the 
     user interface.  
     """
-    app_directory_choices = ["~/Downloads/mob_map_dl", 
-                             "~/mob_map_dl"]
+    app_directory_choices = ["~/Downloads/mobile-map-downloader", 
+                             "~/mobile-map-downloader"]
     def __init__(self):
         self.app_directory = None
         self.mobile_device = None
@@ -268,10 +268,12 @@ class ConsoleAppMain(object):
             print "{name:<20} {n:>4} files, {size:3.1f} GiB".format(
                         name=name, n=len(maps), size=size_total / 1024**3)
             if long_form:
-                try:
+                if hasattr(lister, "list_url"):
                     print "    URL: {url}".format(url=lister.list_url)
-                except AttributeError:
-                    pass
+                elif hasattr(lister, "download_dir"):
+                    print "    path: {path}".format(path=lister.download_dir)
+                elif hasattr(lister, "install_dir"):
+                    print "    path: {path}".format(path=lister.install_dir)
 
     def print_regular_list(self, lister_dict, patterns):
         """
@@ -299,6 +301,26 @@ class ConsoleAppMain(object):
         else:
             self.print_regular_list(self.app.downloaders, patterns)
             
+    def list_downloaded_maps(self, patterns=None, long_form=False):
+        """
+        List maps that are on the local file system. 
+        Performs ``lsd`` subcommand.
+        """
+        if not patterns:
+            self.print_summary_list(self.app.local_managers, long_form)
+        else:
+            self.print_regular_list(self.app.local_managers, patterns)
+            
+    def list_mobile_maps(self, patterns=None, long_form=False):
+        """
+        List maps that are on a mobile device. 
+        Performs ``lsm`` subcommand.
+        """
+        if not patterns:
+            self.print_summary_list(self.app.installers, long_form)
+        else:
+            self.print_regular_list(self.app.installers, patterns)
+            
     def download_install(self, patterns=None, mode=None):
         """
         Download maps from the Internet and install them on a mobile device.
@@ -321,6 +343,24 @@ class ConsoleAppMain(object):
         lss_parser = subparsers.add_parser(
             "lss", help="list maps on servers on the Internet",
             description="list maps on servers on the Internet")
+        lss_parser.add_argument("-l", "--long_form", action="store_true",
+                                help="display additional information")
+        lss_parser.add_argument("patterns", type=str, nargs="*", metavar="PAT", 
+                                help="pattern that selects maps, for example:"
+                                     '"osmand/France*", must be quoted')
+
+        lss_parser = subparsers.add_parser(
+            "lsd", help="list maps that have been downloaded",
+            description="list maps that have been downloaded")
+        lss_parser.add_argument("-l", "--long_form", action="store_true",
+                                help="display additional information")
+        lss_parser.add_argument("patterns", type=str, nargs="*", metavar="PAT", 
+                                help="pattern that selects maps, for example:"
+                                     '"osmand/France*", must be quoted')
+
+        lss_parser = subparsers.add_parser(
+            "lsm", help="list maps on mobile devices",
+            description="list maps on mobile devices")
         lss_parser.add_argument("-l", "--long_form", action="store_true",
                                 help="display additional information")
         lss_parser.add_argument("patterns", type=str, nargs="*", metavar="PAT", 
@@ -350,6 +390,14 @@ class ConsoleAppMain(object):
         
         if args.subcommand == "lss":
             func = self.list_server_maps
+            arg_dict = {"long_form": args.long_form,
+                        "patterns": args.patterns}
+        elif args.subcommand == "lsd":
+            func = self.list_downloaded_maps
+            arg_dict = {"long_form": args.long_form,
+                        "patterns": args.patterns}
+        elif args.subcommand == "lsm":
+            func = self.list_mobile_maps
             arg_dict = {"long_form": args.long_form,
                         "patterns": args.patterns}
         elif args.subcommand == "install":
