@@ -72,7 +72,7 @@ def create_writable_test_dirs(idx):
     shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
     return test_app_dir, test_dev_dir
     
-
+#--- AppHighLevel
 def test_AppHighLevel_get_filtered_map_list():
     "AppHighLevel: test get_filtered_map_list()"
     from mobile_map_downloader.main import AppHighLevel
@@ -200,7 +200,7 @@ def test_AppHighLevel_download_install():
     assert path.isfile(path.join(mobile_device, "osmand", 
                                  "Faroe-islands_europe_2.obf"))
     
-
+#--- ConsoleAppMain
 def test_ConsoleAppMain_list_server_maps():
     "ConsoleAppMain: test listing maps on remote servers"
     from mobile_map_downloader.main import ConsoleAppMain
@@ -222,6 +222,7 @@ def test_ConsoleAppMain_parse_aguments():
     print "Start"
     m = ConsoleAppMain()
     
+    # lss ---------------------------------------------
     func, arg_dict = m.parse_aguments(["lss", "-l"])
     assert func == m.list_server_maps
     assert arg_dict["long_form"] == True
@@ -241,6 +242,23 @@ def test_ConsoleAppMain_parse_aguments():
     assert arg_dict["long_form"] == True
     assert arg_dict["patterns"] == ["osmand/France*"]
     
+    # lss ---------------------------------------------
+    func, arg_dict = m.parse_aguments(["install", "osmand/France*"])
+    assert func == m.download_install
+    assert arg_dict["patterns"] == ["osmand/France*"]
+    assert arg_dict["mode"] == "only_missing"
+    
+    func, arg_dict = m.parse_aguments(["install", "osmand/France*", "-u"])
+    assert func == m.download_install
+    assert arg_dict["mode"] == "replace_newer"
+    
+    func, arg_dict = m.parse_aguments(["install", "osmand/France*", "-f"])
+    assert func == m.download_install
+    assert arg_dict["mode"] == "replace_all"
+    
+#    #Must raise exception & print help message
+#    func, arg_dict = m.parse_aguments(["install"])
+    
 #    m.parse_aguments(["-h"])
 #    m.parse_aguments(["lss", "-h"])
     
@@ -250,8 +268,8 @@ if __name__ == "__main__":
 #    test_AppHighLevel_download_file()
 #    test_AppHighLevel_install_file()
 #    test_AppHighLevel_plan_work()
-    test_AppHighLevel_download_install()
+#    test_AppHighLevel_download_install()
 #    test_ConsoleAppMain_list_server_maps()
-#    test_ConsoleAppMain_parse_aguments()
+    test_ConsoleAppMain_parse_aguments()
     
     pass

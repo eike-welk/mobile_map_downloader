@@ -298,7 +298,13 @@ class ConsoleAppMain(object):
             self.print_summary_list(self.app.downloaders, long_form)
         else:
             self.print_regular_list(self.app.downloaders, patterns)
-
+            
+    def download_install(self, patterns=None, mode=None):
+        """
+        Download maps from the Internet and install them on a mobile device.
+        """
+        self.app.download_install(patterns, mode)
+        
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
@@ -321,8 +327,24 @@ class ConsoleAppMain(object):
                                 help="pattern that selects maps, for example:"
                                      '"osmand/France*", must be quoted')
         
+        install_parser = subparsers.add_parser(
+            "install", help="download maps and install them",
+            description="Download maps from the Internet and install them on"
+                        "a mobile device. As default only downloads and "
+                        "installs missing maps. Use option '-u' to update to"
+                        "newer version of a map.")
+        install_parser.add_argument("-u", "--update_newer", action="store_true",
+                                    help="update maps if newer version is available")
+        install_parser.add_argument("-f", "--force_update", action="store_true",
+                                    help="update all maps that match the pattern")
+#        install_parser.add_argument("-l", "--long_form", action="store_true",
+#                                help="display additional information")
+        install_parser.add_argument("patterns", type=str, nargs="+", metavar="PAT", 
+                                    help="pattern that selects maps, for example:"
+                                         '"osmand/France*", must be quoted')
+        
         args = parser.parse_args(cmd_args)
-        print args
+#        print args
         
         self.app.mobile_device = args.mobile_device
         
@@ -330,9 +352,19 @@ class ConsoleAppMain(object):
             func = self.list_server_maps
             arg_dict = {"long_form": args.long_form,
                         "patterns": args.patterns}
-            return func, arg_dict
+        elif args.subcommand == "install":
+            func = self.download_install
+            mode = "only_missing"
+            if args.update_newer:
+                mode = "replace_newer"
+            if args.force_update:
+                mode = "replace_all"
+            arg_dict = {"mode":mode,
+                        "patterns": args.patterns}
         else:
-            RuntimeError("Unrecognized subcommand.")
+            raise RuntimeError("Unrecognized subcommand.")
+        
+        return func, arg_dict
         
     def main(self):
         """
