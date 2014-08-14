@@ -17,7 +17,7 @@ The program currently only supports **OsmAnd**:
     http://osmand.net/
 
 If you find any **errors**, or if you have good ideas for the program,
-please put them into the projects **issue tracker**:
+please put them into the project's **issue tracker**:
 
    https://github.com/eike-welk/mobile_map_downloader/issues 
 
@@ -50,7 +50,7 @@ Patterns with wildcards should be quoted, because the shell might fill them in.
 
 Install maps of France for OsmAnd, on a certain device::
 
-    dlmap install "osmand/France*" -m /var/run/media/eike/1A042-B123/
+    dlmap -m /var/run/media/eike/1A042-B123/ install "osmand/France*"
  
 The program has a built in help facility, detailed information about its
 changing set of features has to be taken from it::

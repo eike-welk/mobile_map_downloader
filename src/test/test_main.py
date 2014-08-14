@@ -219,7 +219,7 @@ def test_ConsoleAppMain_parse_aguments():
     "ConsoleAppMain: test parsing command line arguments"
     from mob_map_dl.main import ConsoleAppMain
     
-    print "Start"
+    print "Start testing: ConsoleAppMain.parse_aguments"
     m = ConsoleAppMain()
     
     # lss ---------------------------------------------
@@ -249,12 +249,19 @@ def test_ConsoleAppMain_parse_aguments():
     assert arg_dict["mode"] == "only_missing"
     
     func, arg_dict = m.parse_aguments(["install", "osmand/France*", "-u"])
-    assert func == m.download_install
     assert arg_dict["mode"] == "replace_newer"
     
     func, arg_dict = m.parse_aguments(["install", "osmand/France*", "-f"])
-    assert func == m.download_install
     assert arg_dict["mode"] == "replace_all"
+    
+    # uninst --------------------------------------------
+    func, arg_dict = m.parse_aguments(["uninst", "osmand/France*"])
+    assert func == m.uninstall
+    assert arg_dict["patterns"] == ["osmand/France*"]
+    assert arg_dict["delete_local"] == False
+    
+    func, arg_dict = m.parse_aguments(["uninst", "osmand/France*", "-d"])
+    assert arg_dict["delete_local"] == True
     
 #    #Must raise exception & print help message
 #    func, arg_dict = m.parse_aguments(["install"])

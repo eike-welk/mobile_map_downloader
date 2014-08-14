@@ -292,16 +292,19 @@ class ConsoleAppMain(object):
         print " " * 56 + "{num} files, {size:3.3f} GiB".format(
                         num=len(maps), size=size_total / 1024**3)
 
-    def list_server_maps(self, patterns=None, long_form=False):
+    def list_server_maps(self, patterns, long_form=False):
         """
         List maps that are on servers. Performs ``lss`` subcommand.
+        
+        * patterns: list[str]
+        * long_form: bool
         """
         if not patterns:
             self.print_summary_list(self.app.downloaders, long_form)
         else:
             self.print_regular_list(self.app.downloaders, patterns)
             
-    def list_downloaded_maps(self, patterns=None, long_form=False):
+    def list_downloaded_maps(self, patterns, long_form=False):
         """
         List maps that are on the local file system. 
         Performs ``lsd`` subcommand.
@@ -311,7 +314,7 @@ class ConsoleAppMain(object):
         else:
             self.print_regular_list(self.app.local_managers, patterns)
             
-    def list_mobile_maps(self, patterns=None, long_form=False):
+    def list_mobile_maps(self, patterns, long_form=False):
         """
         List maps that are on a mobile device. 
         Performs ``lsm`` subcommand.
@@ -321,16 +324,25 @@ class ConsoleAppMain(object):
         else:
             self.print_regular_list(self.app.installers, patterns)
             
-    def download_install(self, patterns=None, mode=None):
+    def download_install(self, patterns, mode):
         """
         Download maps from the Internet and install them on a mobile device.
+        
+        * patterns: list[str]
+        * mode: str
         """
         self.app.download_install(patterns, mode)
         
+    def uninstall(self, patterns, delete_local=False):
+        """
+        Delete maps on a mobile device, and optionally locally.
+        """
+        raise NotImplementedError("Not implemented!")
+    
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
-                            "Download and download_install maps for mobile devices.")
+                    "Download and download_install maps for mobile devices.")
         parser.add_argument("-m", "--mobile_device", metavar="DIR",
                             help="directory that represents the mobile device")
 #        parser.add_argument("-v", "--verbose", action="store_true",
@@ -367,22 +379,34 @@ class ConsoleAppMain(object):
                                 help="pattern that selects maps, for example:"
                                      '"osmand/France*", must be quoted')
         
-        install_parser = subparsers.add_parser(
+        install_prs = subparsers.add_parser(
             "install", help="download maps and install them",
             description="Download maps from the Internet and install them on"
                         "a mobile device. As default only downloads and "
                         "installs missing maps. Use option '-u' to update to"
                         "newer version of a map.")
-        install_parser.add_argument("-u", "--update_newer", action="store_true",
-                                    help="update maps if newer version is available")
-        install_parser.add_argument("-f", "--force_update", action="store_true",
-                                    help="update all maps that match the pattern")
-#        install_parser.add_argument("-l", "--long_form", action="store_true",
+        install_prs.add_argument("-u", "--update_newer", action="store_true",
+                                 help="update maps if newer version is "
+                                      "available")
+        install_prs.add_argument("-f", "--force_update", action="store_true",
+                                 help="update all maps that match the pattern")
+#        install_prs.add_argument("-l", "--long_form", action="store_true",
 #                                help="display additional information")
-        install_parser.add_argument("patterns", type=str, nargs="+", metavar="PAT", 
-                                    help="pattern that selects maps, for example:"
-                                         '"osmand/France*", must be quoted')
-        
+        install_prs.add_argument("patterns", type=str, nargs="+", metavar="PAT", 
+                                 help="pattern that selects maps, for example:"
+                                      '"osmand/France*", must be quoted')
+ 
+        uninst_prs = subparsers.add_parser(
+            "uninst", help="remove maps from the mobile device",
+            description="remove maps from the mobile device, "
+                        "and optionally from the local file system.")
+        uninst_prs.add_argument("-d", "--downloaded", action="store_true",
+                                help="additionally remove the downloaded "
+                                     "maps from the local file system")
+        uninst_prs.add_argument("patterns", type=str, nargs="+", metavar="PAT", 
+                                 help="pattern that selects maps, for example:"
+                                      '"osmand/France*", must be quoted')
+       
         args = parser.parse_args(cmd_args)
 #        print args
         
@@ -390,8 +414,8 @@ class ConsoleAppMain(object):
         
         if args.subcommand == "lss":
             func = self.list_server_maps
-            arg_dict = {"long_form": args.long_form,
-                        "patterns": args.patterns}
+            arg_dict = {"long_form": args.long_form, # bool
+                        "patterns": args.patterns}   # list[str]
         elif args.subcommand == "lsd":
             func = self.list_downloaded_maps
             arg_dict = {"long_form": args.long_form,
@@ -407,8 +431,12 @@ class ConsoleAppMain(object):
                 mode = "replace_newer"
             if args.force_update:
                 mode = "replace_all"
-            arg_dict = {"mode":mode,
-                        "patterns": args.patterns}
+            arg_dict = {"mode":mode,                 # str
+                        "patterns": args.patterns}   # list[str]
+        elif args.subcommand == "uninst":
+            func = self.uninstall
+            arg_dict = {"delete_local":args.downloaded, # bool
+                        "patterns": args.patterns}      # list[str]
         else:
             raise RuntimeError("Unrecognized subcommand.")
         
