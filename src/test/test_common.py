@@ -53,7 +53,7 @@ def test_TextProgressBar():
     """
     Test class TextProgressBar
     """
-    from mobile_map_downloader.common import TextProgressBar
+    from mob_map_dl.common import TextProgressBar
     
     print "Start"
     pb = TextProgressBar("Foo: 42 bar", 42)
@@ -65,7 +65,7 @@ def test_TextProgressBar():
 
 def test_items_sorted():
     """Test function items_sorted"""
-    from mobile_map_downloader.common import items_sorted
+    from mob_map_dl.common import items_sorted
     
     d = {"b":2, "a":1, "d":4, "c":3}
     print d

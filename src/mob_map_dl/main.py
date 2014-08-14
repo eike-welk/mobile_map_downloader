@@ -34,10 +34,10 @@ import fnmatch
 import os.path as path
 import os
 
-from mobile_map_downloader.common import MapMeta, items_sorted
-from mobile_map_downloader.download import OsmandDownloader
-from mobile_map_downloader.local import OsmandManager
-from mobile_map_downloader.install import OsmandInstaller
+from mob_map_dl.common import MapMeta, items_sorted
+from mob_map_dl.download import OsmandDownloader
+from mob_map_dl.local import OsmandManager
+from mob_map_dl.install import OsmandInstaller
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -53,8 +53,8 @@ class AppHighLevel(object):
     High level operations of the program, that are not directly relates to the 
     user interface.  
     """
-    app_directory_choices = ["~/Downloads/mobile_map_downloader", 
-                             "~/mobile_map_downloader"]
+    app_directory_choices = ["~/Downloads/mob_map_dl", 
+                             "~/mob_map_dl"]
     def __init__(self):
         self.app_directory = None
         self.mobile_device = None
@@ -366,10 +366,13 @@ class ConsoleAppMain(object):
         
         return func, arg_dict
         
-    def main(self):
+    @staticmethod
+    def main():
         """
         The program's main method.
         """
-        func, arg_dict = self.parse_aguments(sys.argv[1:])
-        self.app.create_low_level_components()
+        consoleApp = ConsoleAppMain()
+        func, arg_dict = consoleApp.parse_aguments(sys.argv[1:])
+        consoleApp.app.create_low_level_components()
         func(**arg_dict) #IGNORE:W0142
+

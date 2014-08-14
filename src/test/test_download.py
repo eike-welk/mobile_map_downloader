@@ -71,7 +71,7 @@ def find_index(list_like, search_val, key=lambda x:x):
     
 def test_OsmandDownloader_get_map_list():
     "Test class OsmandDownloader: Listing of files that can be downloaded."
-    from mobile_map_downloader.download import OsmandDownloader
+    from mob_map_dl.download import OsmandDownloader
     
     print "Start get_map_list"
     d = OsmandDownloader()
@@ -99,7 +99,7 @@ def test_OsmandDownloader_get_map_list():
     
 def test_OsmandDownloader_download_file():
     "Test class OsmandDownloader: Downloading of files from Osmand server."
-    from mobile_map_downloader.download import OsmandDownloader
+    from mob_map_dl.download import OsmandDownloader
     
     print "Start download_file"
     test_map_name = relative_path("../../test_tmp/test_1.obf.zip")

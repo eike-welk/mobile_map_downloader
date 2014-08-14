@@ -57,14 +57,14 @@ def create_writable_test_dirs(idx):
     
     The following directories are created:
     
-    "../../test_tmp/mobile_map_downloader" + idx 
+    "../../test_tmp/mob_map_dl" + idx 
         Application directory with test data.
         
     "../../test_tmp/TEST-DEVICE" + idx
         Device directory  with test data.
     """
     idx = str(idx)
-    test_app_dir = relative_path("../../test_tmp/mobile_map_downloader" + idx)
+    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
     test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
     shutil.rmtree(test_app_dir, ignore_errors=True)
     shutil.rmtree(test_dev_dir, ignore_errors=True)
@@ -75,7 +75,7 @@ def create_writable_test_dirs(idx):
 #def download_test_data():
 #    "Download some test data"
 #    #    #File size 0.2 MiB
-#    from mobile_map_downloader.download import OsmandDownloader
+#    from mob_map_dl.download import OsmandDownloader
 #    d = OsmandDownloader()
 #    srvname = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
 #    locname = relative_path("../../test_data/maps/osmand/Monaco_europe_2.obf.zip")
@@ -89,7 +89,7 @@ def create_writable_test_dirs(idx):
 def test_OsmandManager_get_map_list():
     "Test class OsmandManager: Extracting maps from downloaded archives."
 
-    from mobile_map_downloader.local import OsmandManager
+    from mob_map_dl.local import OsmandManager
     download_dir = relative_path("../../test_data/maps/")
     
     m = OsmandManager(download_dir)
@@ -106,7 +106,7 @@ def test_OsmandManager_get_map_extractor():
     OsmandManager: Create an object that extracts a map from one of the 
     downloaded *.zip files.
     """
-    from mobile_map_downloader.local import OsmandManager
+    from mob_map_dl.local import OsmandManager
     
     download_dir = relative_path("../../test_data/maps/osmand/")
     map_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
@@ -125,7 +125,7 @@ def test_OsmandManager_get_map_extractor():
 
 def test_OsmandManager_extract_map():
     "Test class OsmandManager: Extracting maps from downloaded archives."
-    from mobile_map_downloader.local import OsmandManager
+    from mob_map_dl.local import OsmandManager
     
     print "Start prepare map."
     test_app_dir, test_dev_dir = create_writable_test_dirs("l3")

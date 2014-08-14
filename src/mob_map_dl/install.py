@@ -34,8 +34,8 @@ from os import path
 import datetime
 from itertools import cycle
 
-from mobile_map_downloader.common import MapMeta
-from mobile_map_downloader.common import TextProgressBar
+from mob_map_dl.common import MapMeta
+from mob_map_dl.common import TextProgressBar
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.

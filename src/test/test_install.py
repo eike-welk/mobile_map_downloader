@@ -52,7 +52,7 @@ def relative_path(*path_comps):
 
 def test_OsmandInstaller_get_map_list():
     "OsmandInstaller: Get list of installed maps."
-    from mobile_map_downloader.install import OsmandInstaller   
+    from mob_map_dl.install import OsmandInstaller   
     
     device_path = relative_path("../../test_data/TEST-DEVICE1")
     
@@ -69,8 +69,8 @@ def test_OsmandInstaller_get_map_list():
     
 #def test_OsmandInstaller_install_map():
 #    "OsmandInstaller: Install one map file."
-#    from mobile_map_downloader.install import OsmandInstaller  
-#    from mobile_map_downloader.local import OsmandManager
+#    from mob_map_dl.install import OsmandInstaller  
+#    from mob_map_dl.local import OsmandManager
 #    
 #    download_dir = relative_path("../../test_data/maps/")
 #    archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")

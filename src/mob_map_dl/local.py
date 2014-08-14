@@ -34,7 +34,7 @@ from os import path
 import zipfile
 import datetime
 
-from mobile_map_downloader.common import MapMeta, TextProgressBar
+from mob_map_dl.common import MapMeta, TextProgressBar
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.

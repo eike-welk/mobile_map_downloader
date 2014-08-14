@@ -57,14 +57,14 @@ def create_writable_test_dirs(idx):
     
     The following directories are created:
     
-    "../../test_tmp/mobile_map_downloader" + idx 
+    "../../test_tmp/mob_map_dl" + idx 
         Application directory with test data.
         
     "../../test_tmp/TEST-DEVICE" + idx
         Device directory  with test data.
     """
     idx = str(idx)
-    test_app_dir = relative_path("../../test_tmp/mobile_map_downloader" + idx)
+    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
     test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
     shutil.rmtree(test_app_dir, ignore_errors=True)
     shutil.rmtree(test_dev_dir, ignore_errors=True)
@@ -75,7 +75,7 @@ def create_writable_test_dirs(idx):
 #--- AppHighLevel
 def test_AppHighLevel_get_filtered_map_list():
     "AppHighLevel: test get_filtered_map_list()"
-    from mobile_map_downloader.main import AppHighLevel
+    from mob_map_dl.main import AppHighLevel
     
     print "Start"
     app = AppHighLevel()
@@ -110,8 +110,8 @@ def test_AppHighLevel_get_filtered_map_list():
 def test_AppHighLevel_plan_work():
     "AppHighLevel: test plan_work"
     from datetime import datetime
-    from mobile_map_downloader.common import MapMeta
-    from mobile_map_downloader.main import AppHighLevel
+    from mob_map_dl.common import MapMeta
+    from mob_map_dl.main import AppHighLevel
     
     print "Start"
     #Create source and destination lists
@@ -141,8 +141,8 @@ def test_AppHighLevel_plan_work():
     
 def test_AppHighLevel_download_file():
     "AppHighLevel: test download_file()"
-    from mobile_map_downloader.main import AppHighLevel
-    from mobile_map_downloader.common import MapMeta
+    from mob_map_dl.main import AppHighLevel
+    from mob_map_dl.common import MapMeta
     
     print "Start"
     app_directory, mobile_device = create_writable_test_dirs("m1")    
@@ -161,8 +161,8 @@ def test_AppHighLevel_download_file():
     
 def test_AppHighLevel_install_file():
     "AppHighLevel: test install_file()"
-    from mobile_map_downloader.main import AppHighLevel
-    from mobile_map_downloader.common import MapMeta
+    from mob_map_dl.main import AppHighLevel
+    from mob_map_dl.common import MapMeta
     
     print "Start"
     app_directory, mobile_device = create_writable_test_dirs("m2")
@@ -185,7 +185,7 @@ def test_AppHighLevel_install_file():
     
 def test_AppHighLevel_download_install():
     "AppHighLevel: test get_filtered_map_list()"
-    from mobile_map_downloader.main import AppHighLevel
+    from mob_map_dl.main import AppHighLevel
     
     print "Start"
     app_directory, mobile_device = create_writable_test_dirs("m3")
@@ -203,7 +203,7 @@ def test_AppHighLevel_download_install():
 #--- ConsoleAppMain
 def test_ConsoleAppMain_list_server_maps():
     "ConsoleAppMain: test listing maps on remote servers"
-    from mobile_map_downloader.main import ConsoleAppMain
+    from mob_map_dl.main import ConsoleAppMain
     
     print "Start"
     m = ConsoleAppMain()
@@ -217,7 +217,7 @@ def test_ConsoleAppMain_list_server_maps():
     
 def test_ConsoleAppMain_parse_aguments():
     "ConsoleAppMain: test parsing command line arguments"
-    from mobile_map_downloader.main import ConsoleAppMain
+    from mob_map_dl.main import ConsoleAppMain
     
     print "Start"
     m = ConsoleAppMain()
@@ -242,7 +242,7 @@ def test_ConsoleAppMain_parse_aguments():
     assert arg_dict["long_form"] == True
     assert arg_dict["patterns"] == ["osmand/France*"]
     
-    # lss ---------------------------------------------
+    # install ---------------------------------------------
     func, arg_dict = m.parse_aguments(["install", "osmand/France*"])
     assert func == m.download_install
     assert arg_dict["patterns"] == ["osmand/France*"]
