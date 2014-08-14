@@ -89,8 +89,7 @@ if args.start:
     pypirc_text = textwrap.dedent(
         """
         [distutils]
-        index-servers =
-            pypi
+        index-servers = pypi
         
         [pypi]
         repository: http://www.python.org/pypi

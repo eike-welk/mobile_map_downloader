@@ -6,13 +6,15 @@ Mobile Map Downloader is a command line program to download maps from the
 Internet and install them on mobile devices, such as smart phones. The program
 is intended to run on a (personal) computer, that has a fast and cheap Internet
 connection, and a large hard disk. The downloaded maps are also stored on the
-local computer.
+personal computer.
 
 The software is currently in **beta state**. It can be productively used by
 adventurous people, or semi experts. Expect it to lack some functionality, to
 crash often, and to sometimes do unwanted things.
 
-The program currently only supports **OsmAnd**: http://osmand.net/
+The program currently only supports **OsmAnd**: 
+    
+    http://osmand.net/
 
 The program is written in the **Python** programming language, version **2.7**.
 Contributions of code are very welcome. The program has currently only been
@@ -25,16 +27,16 @@ Installation
 
 Open a terminal, get administrator/root privileges and type::
     
-    pip install mobile-map-download -U
+    pip install mobile-map-download --pre -U
 
-Alternatively you can install the program with Virtualenv, when you don't wand
-to use root privileges, and want to delete the program from your computer
+Alternatively you can install the program with **Virtualenv**. With Virtualenv you
+don't need root privileges, and can delete the program from your computer
 without a trace::
     
     virtualenv virtualenv/  #can use any name for the directory
     cd virtualenv/
     source bin/activate
-    pip install mobile-map-download -U
+    pip install mobile-map-download --pre -U
 
 
 Usage

@@ -34,7 +34,7 @@ import fnmatch
 import os.path as path
 import os
 
-from mob_map_dl.common import MapMeta, items_sorted
+from mob_map_dl.common import items_sorted
 from mob_map_dl.download import OsmandDownloader
 from mob_map_dl.local import OsmandManager
 from mob_map_dl.install import OsmandInstaller
