@@ -170,42 +170,49 @@ class AppHighLevel(object):
         return all_matches
 
     #--- File manipulation
-    def download_file(self, file_meta):
-        """Download a file from the Internet to the local file system."""
+    def get_component(self, file_meta, component_dict):
+        """
+        Get the software component that can handle a certain file.
+        
+        file_meta: MapMeta
+            Record of information about a certain file
+            
+        component_dict: dict[str:object]
+            Dictionary of low level components that do the real work.
+        """
         disp_name = file_meta.disp_name
         comp_name, _ = path.split(disp_name)
-        dl_component = self.downloaders[comp_name]
-        lo_component = self.local_managers[comp_name]
-        lo_path = lo_component.make_full_name(disp_name)
-        dl_component.download_file(srv_url=file_meta.full_name, 
-                                   loc_name=lo_path, 
-                                   disp_name=disp_name)
+        component = component_dict[comp_name]
+        return component
+    
+    def download_file(self, file_meta):
+        """Download a file from the Internet to the local file system."""
+        down_comp = self.get_component(file_meta, self.downloaders)
+        loca_comp = self.get_component(file_meta, self.local_managers)
+        loca_path = loca_comp.make_full_name(file_meta.disp_name)
+        down_comp.download_file(srv_url=file_meta.full_name, 
+                                loc_name=loca_path, 
+                                disp_name=file_meta.disp_name)
 
     def install_file(self, file_meta):
         """Install a file from the local file system on the mobile device."""
-        disp_name = file_meta.disp_name
-        comp_name, _ = path.split(disp_name)
-        loca_component = self.local_managers[comp_name]
-        inst_component = self.installers[comp_name]
-        inst_path = inst_component.make_full_name(disp_name)
-        loca_component.extract_map(arch_path=file_meta.full_name, 
+        loca_comp = self.get_component(file_meta, self.local_managers)
+        inst_comp = self.get_component(file_meta, self.installers)
+        inst_path = inst_comp.make_full_name(file_meta.disp_name)
+        loca_comp.extract_map(arch_path=file_meta.full_name, 
                                    map_path=inst_path, 
-                                   disp_name=disp_name)
+                                   disp_name=file_meta.disp_name)
         
     def delete_file_mobile(self, file_meta):    
         """Delete file on the mobile device."""
-        disp_name = file_meta.disp_name
-        comp_name, _ = path.split(disp_name)
-        inst_component = self.installers[comp_name]
-        inst_path = inst_component.make_full_name(disp_name)
+        inst_component = self.get_component(file_meta, self.installers)
+        inst_path = inst_component.make_full_name(file_meta.disp_name)
         os.remove(inst_path)
         
     def delete_file_local(self, file_meta):
         """Delete file on the local file system."""
-        disp_name = file_meta.disp_name
-        comp_name, _ = path.split(disp_name)
-        loca_component = self.local_managers[comp_name]
-        loca_path = loca_component.make_full_name(disp_name)
+        loca_component = self.get_component(file_meta, self.local_managers)
+        loca_path = loca_component.make_full_name(file_meta.disp_name)
         os.remove(loca_path)
         
     #--- High level file operations
@@ -300,6 +307,19 @@ class AppHighLevel(object):
     def uninstall(self, patterns, delete_local):
         """
         Delete maps on a mobile device, and optionally locally.
+        
+        Arguments
+        ---------
+        
+        patterns: list[str]
+            List of patterns with wildcards, that specify maps. 
+            For example ["*France*", "*Germany*"]
+        
+        delete_local: bool
+            If ``True``: 
+                Delete files on the local file system and on the mobile device.
+            If ``False``:
+                Delete files only on the mobile device.
         """
         del_maps = self.get_filtered_map_list(self.installers, patterns)
         del_size = 0
