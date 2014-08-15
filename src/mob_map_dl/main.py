@@ -96,7 +96,13 @@ class AppHighLevel(object):
             print "No writable download directory! No downloads are possible."
             
         if self.mobile_device:
-            self.installers = {"osmand": OsmandInstaller(self.mobile_device)}
+            try:
+                self.installers = {
+                                "osmand": OsmandInstaller(self.mobile_device)}
+            except OSError, err:
+                print "Error while initializing mobile device:"
+                print err
+                self.installers = {}
         else:
             print "No mobile device!"
             
