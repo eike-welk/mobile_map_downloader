@@ -138,6 +138,28 @@ def test_AppHighLevel_plan_work():
     pprint(work)
     assert len(work) == 3
 
+
+def test_AppHighLevel_filter_possible_work():
+    from mob_map_dl.common import MapMeta
+    from mob_map_dl.main import AppHighLevel
+    
+    print "Start"
+    #Create application and device directories to initialize the application
+    app_directory, mobile_device = create_writable_test_dirs("m0")
+    #Create source and destination lists
+    work = [MapMeta("osmand/map1", None, None, None, None, None),
+            MapMeta("foo/map2", None, None, None, None, None),
+            MapMeta("bar/map3", None, None, None, None, None)]
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    good_work = app.filter_possible_work(work, app.local_managers)
+    pprint(good_work)
+    
+    assert len(good_work) == 1
+    assert good_work[0].disp_name == "osmand/map1"
+    
     
 def test_AppHighLevel_download_file():
     "AppHighLevel: test download_file()"
@@ -344,8 +366,9 @@ if __name__ == "__main__":
 #    test_AppHighLevel_delete_file_mobile()
 #    test_AppHighLevel_delete_file_local()
 #    test_AppHighLevel_plan_work()
+    test_AppHighLevel_filter_possible_work()
 #    test_AppHighLevel_download_install()
-    test_AppHighLevel_uninstall()
+#    test_AppHighLevel_uninstall()
 #    test_ConsoleAppMain_list_server_maps()
 #    test_ConsoleAppMain_parse_aguments()
     

@@ -179,6 +179,13 @@ class AppHighLevel(object):
             
         component_dict: dict[str:object]
             Dictionary of low level components that do the real work.
+            
+        Returns
+        -------
+        
+        object
+            Low level handler object. Can download files or extract maps from 
+            archive.
         """
         disp_name = file_meta.disp_name
         comp_name, _ = path.split(disp_name)
@@ -242,6 +249,12 @@ class AppHighLevel(object):
             "replace_all"
                 Do the work for each source file. Possibly existing destination
                 files are always overwritten.
+                
+        Returns
+        -------
+        
+        list[MapMeta]
+            Records from ``source_files``. The work should be done with them.
         """
         supported_modes = ["only_missing", "replace_newer", "replace_all"]
         if mode not in supported_modes:
@@ -264,6 +277,19 @@ class AppHighLevel(object):
                     work_files.append(source_file)
         
         return work_files
+    
+    def filter_possible_work(self, work_files, component_dict):
+        """Remove files that can't be handled by any component."""
+        good_work = []
+        for file_ in work_files:
+            try:
+                #Try to get a component that can handle the file, 
+                #when we find one the work is considered possible.
+                _ = self.get_component(file_, component_dict)
+            except KeyError:
+                continue
+            good_work.append(file_)
+        return good_work
         
     def download_install(self, patterns, mode):
         """
@@ -283,7 +309,8 @@ class AppHighLevel(object):
         #Download maps
         srv_maps = self.get_filtered_map_list(self.downloaders, patterns)
         loc_maps = self.get_filtered_map_list(self.local_managers, patterns)
-        down_maps = self.plan_work(srv_maps, loc_maps, mode)
+        work_maps = self.plan_work(srv_maps, loc_maps, mode)
+        down_maps = self.filter_possible_work(work_maps, self.local_managers)
         down_size = 0
         for map_ in down_maps:
             down_size += map_.size
@@ -295,7 +322,8 @@ class AppHighLevel(object):
         #Install maps
         loc_maps = self.get_filtered_map_list(self.local_managers, patterns)
         dev_maps = self.get_filtered_map_list(self.installers, patterns)
-        inst_maps = self.plan_work(loc_maps, dev_maps, mode)
+        work_maps = self.plan_work(loc_maps, dev_maps, mode)
+        inst_maps = self.filter_possible_work(work_maps, self.installers)
         inst_size = 0
         for map_ in inst_maps:
             inst_size += map_.size
