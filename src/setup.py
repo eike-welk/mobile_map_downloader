@@ -19,7 +19,7 @@ def read(fname):
 
 #Start the setup machinery, give it detailed information about this library.
 setup(name="mobile-map-downloader",
-      version="0.1.2",
+      version="0.1.3",
       description="Download maps for mobile devices over broadband, "
                   "with a personal computer.",
       long_description=read("README.rst"),
