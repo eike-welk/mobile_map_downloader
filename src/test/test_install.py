@@ -50,14 +50,14 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
-def test_OsmandInstaller_get_map_list():
+def test_OsmandInstaller_get_file_list():
     "OsmandInstaller: Get list of installed maps."
     from mob_map_dl.install import OsmandInstaller   
     
     device_path = relative_path("../../test_data/TEST-DEVICE1")
     
     i = OsmandInstaller(device_path)
-    l = i.get_map_list()
+    l = i.get_file_list()
     
     pprint(l)
     assert len(l) == 2
@@ -92,7 +92,7 @@ def test_OsmandInstaller_get_map_list():
     
 
 if __name__ == "__main__":
-#    test_OsmandInstaller_get_map_list()
+#    test_OsmandInstaller_get_file_list()
 #    test_OsmandInstaller_install_map()
     
     pass

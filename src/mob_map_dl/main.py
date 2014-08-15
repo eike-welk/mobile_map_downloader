@@ -147,7 +147,7 @@ class AppHighLevel(object):
         ----------
         
         lister_dict: dict[str:object]
-            Objects must have a method ``get_map_list() -> [MapMeta]``.
+            Objects must have a method ``get_file_list() -> [MapMeta]``.
         
         patterns: list[str]
             List of shell wildcard patterns.
@@ -160,7 +160,7 @@ class AppHighLevel(object):
         #Get listing of all maps of all servers.
         all_maps = []
         for _, downloader in items_sorted(lister_dict):
-            maps = downloader.get_map_list()
+            maps = downloader.get_file_list()
             all_maps += maps
         #Filter the names for the patterns.
         all_matches = []
@@ -180,7 +180,7 @@ class AppHighLevel(object):
         dl_component.download_file(srv_url=file_meta.full_name, 
                                    loc_name=lo_path, 
                                    disp_name=disp_name)
-        
+
     def install_file(self, file_meta):
         """Install a file from the local file system on the mobile device."""
         disp_name = file_meta.disp_name
@@ -189,12 +189,52 @@ class AppHighLevel(object):
         inst_component = self.installers[comp_name]
         inst_path = inst_component.make_full_name(disp_name)
         loca_component.extract_map(arch_path=file_meta.full_name, 
-                                   ext_path=inst_path, 
+                                   map_path=inst_path, 
                                    disp_name=disp_name)
         
+    def delete_file_mobile(self, file_meta):    
+        """Delete file on the mobile device."""
+        disp_name = file_meta.disp_name
+        comp_name, _ = path.split(disp_name)
+        inst_component = self.installers[comp_name]
+        inst_path = inst_component.make_full_name(disp_name)
+        os.remove(inst_path)
+        
+    def delete_file_local(self, file_meta):
+        """Delete file on the local file system."""
+        disp_name = file_meta.disp_name
+        comp_name, _ = path.split(disp_name)
+        loca_component = self.local_managers[comp_name]
+        loca_path = loca_component.make_full_name(disp_name)
+        os.remove(loca_path)
+        
+    #--- High level file operations
     def plan_work(self, source_files, dest_files, mode):
         """
-        Compute which files should be downloaded or installed.
+        Plan work, that transforms `source_files` into `dest_files`. For 
+        example downloading or installing files.
+        
+        Arguments
+        ---------
+        
+        source_files, dest_files: list[MapMeta]
+            Lists of `MapMeta` records, that represent source files, and 
+            already existing destination files.
+        
+        mode: str
+            Control the conditions to perform the work on individual files.
+            Legal values are:
+            
+            "only_missing"
+                Do the work only if the destination file does not exist.
+                
+            "replace_newer"
+                Do the work when the source file is newer than the destination
+                file. Also do the work, if the destination file does not exist.
+                
+            "replace_all"
+                Do the work for each source file. Possibly existing destination
+                files are always overwritten.
         """
         supported_modes = ["only_missing", "replace_newer", "replace_all"]
         if mode not in supported_modes:
@@ -209,8 +249,7 @@ class AppHighLevel(object):
             #If there **is no** local map with this name, download it.
             if source_file.disp_name not in dest_dict:
                 work_files.append(source_file)
-                continue
-            if mode == "replace_newer":
+            elif mode == "replace_newer":
                 #If there is a local map with this name, 
                 #download it if map on server **is newer**.
                 dest_file = dest_dict[source_file.disp_name]
@@ -222,6 +261,17 @@ class AppHighLevel(object):
     def download_install(self, patterns, mode):
         """
         Download and install maps that match certain patterns. 
+        
+        Arguments
+        ---------
+        
+        patterns: list[str]
+            List of patterns with wildcards, that specify maps. 
+            For example ["*France*", "*Germany*"]
+        
+        mode: str
+            Control the conditions to download or install a file.
+            For details see: `AppHighLevel.plan_work`
         """
         #Download maps
         srv_maps = self.get_filtered_map_list(self.downloaders, patterns)
@@ -230,7 +280,7 @@ class AppHighLevel(object):
         down_size = 0
         for map_ in down_maps:
             down_size += map_.size
-        print "Downloading: {n} files, {s} GiB".format(n=len(down_maps), 
+        print "Downloading: {n} files, {s:5.3f} GiB".format(n=len(down_maps), 
                                                        s=down_size / 1024**3)
         for map_ in down_maps:
             self.download_file(map_)
@@ -242,11 +292,34 @@ class AppHighLevel(object):
         inst_size = 0
         for map_ in inst_maps:
             inst_size += map_.size
-        print "Installing: {n} files, {s} GiB".format(n=len(inst_maps), 
+        print "Installing: {n} files, {s:5.3f} GiB".format(n=len(inst_maps), 
                                                       s=inst_size / 1024**3)
         for map_ in inst_maps:
             self.install_file(map_)
-
+        
+    def uninstall(self, patterns, delete_local):
+        """
+        Delete maps on a mobile device, and optionally locally.
+        """
+        del_maps = self.get_filtered_map_list(self.installers, patterns)
+        del_size = 0
+        for map_ in del_maps:
+            del_size += map_.size
+        print "Deleting: {n} files, {s:5.3f} GiB on mobile device".format(
+                                    n=len(del_maps), s=del_size / 1024**3)
+        for map_ in del_maps:
+            self.delete_file_mobile(map_)
+        
+        if delete_local:
+            del_maps = self.get_filtered_map_list(self.local_managers, patterns)
+            del_size = 0
+            for map_ in del_maps:
+                del_size += map_.size
+            print "Deleting: {n} files, {s:5.3f} GiB on local disk".format(
+                                        n=len(del_maps), s=del_size / 1024**3)
+            for map_ in del_maps:
+                self.delete_file_local(map_)
+    
 
 class ConsoleAppMain(object):
     """Us being good Java citizens. :-)"""
@@ -261,7 +334,7 @@ class ConsoleAppMain(object):
         * long_form: bool
         """
         for name, lister in items_sorted(lister_dict):
-            maps = lister.get_map_list()
+            maps = lister.get_file_list()
             size_total = 0
             for map_ in maps:
                 size_total += map_.size
@@ -337,12 +410,12 @@ class ConsoleAppMain(object):
         """
         Delete maps on a mobile device, and optionally locally.
         """
-        raise NotImplementedError("Not implemented!")
+        self.app.uninstall(patterns, delete_local)
     
     def parse_aguments(self, cmd_args):
         """Parse the command line arguments"""
         parser = argparse.ArgumentParser(description=
-                    "Download and download_install maps for mobile devices.")
+                    "Download and install maps for mobile devices.")
         parser.add_argument("-m", "--mobile_device", metavar="DIR",
                             help="directory that represents the mobile device")
 #        parser.add_argument("-v", "--verbose", action="store_true",

@@ -80,7 +80,7 @@ class OsmandManager(object):
         full_name = path.join(self.download_dir, fname + ".zip")
         return full_name
     
-    def get_map_list(self):
+    def get_file_list(self):
         """
         Return a list of locally stored maps. Maps are searched in 
         ``self.download_dir``.
@@ -143,7 +143,7 @@ class OsmandManager(object):
         
         return fzip, size_total, mod_time
         
-    def extract_map(self, arch_path, ext_path, disp_name):
+    def extract_map(self, arch_path, map_path, disp_name):
         """
         Extract an Osmand map from its downloaded archive.
         
@@ -153,14 +153,14 @@ class OsmandManager(object):
         arch_path: str
             Path of the archive that contains the map.
         
-        ext_path: str
+        map_path: str
             Path where the extracted map should be stored. For example
             a mobile device's SD card.
         
         disp_name: str
             Canonical name of the map. Used in the progress bar.
         """
-        fext = open(ext_path, "wb")
+        fext = open(map_path, "wb")
         fzip, size_total, _ = self.get_map_extractor(arch_path)
         
         size_mib = round(size_total / 1024**2, 1)

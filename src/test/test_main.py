@@ -166,21 +166,65 @@ def test_AppHighLevel_install_file():
     
     print "Start"
     app_directory, mobile_device = create_writable_test_dirs("m2")
-    file_meta = MapMeta(disp_name="osmand/Jamaica_centralamerica_2.obf", 
-                        full_name=path.join(
-                                    app_directory, 
-                                    "osmand/Jamaica_centralamerica_2.obf.zip"), 
+    file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
+                        full_name=path.join(app_directory, 
+                                            "osmand/Monaco_europe_2.obf.zip"), 
                         size=None, time=None, description=None, map_type=None)
     #Remove file that will be created though install algorithm
-    os.remove(path.join(mobile_device, "osmand/Jamaica_centralamerica_2.obf"))
+    os.remove(path.join(mobile_device, "osmand/Monaco_europe_2.obf"))
     
     app = AppHighLevel()
     app.create_low_level_components(app_directory, mobile_device)
     
     app.install_file(file_meta)
     
-    assert path.isfile(path.join(mobile_device, 
-                                 "osmand/Jamaica_centralamerica_2.obf"))
+    assert path.isfile(path.join(mobile_device, "osmand/Monaco_europe_2.obf"))  
+    
+    
+def test_AppHighLevel_delete_file_mobile():
+    "AppHighLevel: test install_file()"
+    from mob_map_dl.main import AppHighLevel
+    from mob_map_dl.common import MapMeta
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m4")
+    file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
+                        full_name=None, size=None, time=None, 
+                        description=None, map_type=None)
+    delete_path = path.join(mobile_device, "osmand/Monaco_europe_2.obf")
+    #Test that directory that we are going to delete really exists
+    assert path.exists(delete_path)
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.delete_file_mobile(file_meta)
+    
+    #test that file has really been deleted
+    assert not path.exists(delete_path)
+    
+    
+def test_AppHighLevel_delete_file_local():
+    "AppHighLevel: test install_file()"
+    from mob_map_dl.main import AppHighLevel
+    from mob_map_dl.common import MapMeta
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m4")
+    file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
+                        full_name=None, size=None, time=None, 
+                        description=None, map_type=None)
+    delete_path = path.join(app_directory, "osmand/Monaco_europe_2.obf.zip")
+    #Test that directory that we are going to delete really exists
+    assert path.exists(delete_path)
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.delete_file_local(file_meta)
+    
+    #test that file has really been deleted
+    assert not path.exists(delete_path)
     
     
 def test_AppHighLevel_download_install():
@@ -188,7 +232,7 @@ def test_AppHighLevel_download_install():
     from mob_map_dl.main import AppHighLevel
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m3")
+    app_directory, mobile_device = create_writable_test_dirs("m5")
     
     app = AppHighLevel()
     app.create_low_level_components(app_directory, mobile_device)
@@ -199,6 +243,29 @@ def test_AppHighLevel_download_install():
                                  "Faroe-islands_europe_2.obf.zip"))
     assert path.isfile(path.join(mobile_device, "osmand", 
                                  "Faroe-islands_europe_2.obf"))
+    
+    
+def test_AppHighLevel_uninstall():
+    "AppHighLevel: test get_filtered_map_list()"
+    from mob_map_dl.main import AppHighLevel
+    
+    print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m6")
+    mob_file = path.join(mobile_device, "osmand", "Monaco_europe_2.obf")
+    loc_file = path.join(app_directory, "osmand", "Monaco_europe_2.obf.zip")
+    #Test if files that will be deleted exist
+    assert path.isfile(mob_file)
+    assert path.isfile(loc_file)
+    
+    app = AppHighLevel()
+    app.create_low_level_components(app_directory, mobile_device)
+    
+    app.uninstall(["*Monaco*"], delete_local=False)
+    assert not path.isfile(mob_file)
+    
+    app.uninstall(["*Monaco*"], delete_local=True)
+    assert not path.isfile(loc_file)
+    
     
 #--- ConsoleAppMain
 def test_ConsoleAppMain_list_server_maps():
@@ -274,9 +341,12 @@ if __name__ == "__main__":
 #    test_AppHighLevel_get_filtered_map_list()
 #    test_AppHighLevel_download_file()
 #    test_AppHighLevel_install_file()
+#    test_AppHighLevel_delete_file_mobile()
+#    test_AppHighLevel_delete_file_local()
 #    test_AppHighLevel_plan_work()
 #    test_AppHighLevel_download_install()
+    test_AppHighLevel_uninstall()
 #    test_ConsoleAppMain_list_server_maps()
-    test_ConsoleAppMain_parse_aguments()
+#    test_ConsoleAppMain_parse_aguments()
     
     pass

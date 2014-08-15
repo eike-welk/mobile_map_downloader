@@ -86,14 +86,14 @@ def create_writable_test_dirs(idx):
 #    d.download_file(srvname, locname, "osmand/Jamaica_centralamerica_2")
 
 
-def test_OsmandManager_get_map_list():
+def test_OsmandManager_get_file_list():
     "Test class OsmandManager: Extracting maps from downloaded archives."
 
     from mob_map_dl.local import OsmandManager
     download_dir = relative_path("../../test_data/maps/")
     
     m = OsmandManager(download_dir)
-    l = m.get_map_list()
+    l = m.get_file_list()
     
     pprint(l)
     assert len(l) == 2
@@ -144,7 +144,7 @@ def test_OsmandManager_extract_map():
     
 
 if __name__ == "__main__":
-#    test_OsmandManager_get_map_list()
+#    test_OsmandManager_get_file_list()
 #    test_OsmandManager_get_map_extractor()
     test_OsmandManager_extract_map()
     

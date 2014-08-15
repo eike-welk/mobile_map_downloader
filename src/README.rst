@@ -34,7 +34,7 @@ you don't need root privileges, and can delete the program from your computer
 without a trace::
     
     virtualenv virtualenv/  #can use any name for the directory
-    cd virtualenv/
+    cd virtualenv
     source bin/activate
     pip install mobile-map-download --pre -U
 

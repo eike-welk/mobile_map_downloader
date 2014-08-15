@@ -69,7 +69,7 @@ class OsmandDownloader(object):
         return disp_name
     
     
-    def get_map_list(self):
+    def get_file_list(self):
         """
         Get list of maps for Osmand that are available for download.
         

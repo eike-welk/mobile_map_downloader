@@ -69,13 +69,13 @@ def find_index(list_like, search_val, key=lambda x:x):
         return None
     
     
-def test_OsmandDownloader_get_map_list():
+def test_OsmandDownloader_get_file_list():
     "Test class OsmandDownloader: Listing of files that can be downloaded."
     from mob_map_dl.download import OsmandDownloader
     
-    print "Start get_map_list"
+    print "Start get_file_list"
     d = OsmandDownloader()
-    l = d.get_map_list()
+    l = d.get_file_list()
     
     pprint(l)
     print len(l)
@@ -123,7 +123,7 @@ def test_OsmandDownloader_download_file():
     
     
 if __name__ == "__main__":
-    test_OsmandDownloader_get_map_list()
+    test_OsmandDownloader_get_file_list()
 #    test_OsmandDownloader_download_file()
     
     pass
