@@ -283,7 +283,7 @@ class AppHighLevel(object):
                 #If there is a local map with this name, 
                 #download it if map on server **is newer**.
                 dest_file = dest_dict[source_file.disp_name]
-                if source_file.time > dest_file.time:
+                if source_file.time.date() > dest_file.time.date():
                     work_files.append(source_file)
         
         return work_files
