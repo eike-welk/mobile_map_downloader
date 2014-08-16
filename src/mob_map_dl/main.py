@@ -424,7 +424,7 @@ class ConsoleAppMain(object):
                                         time=str(map_.time.date()))
             size_total += map_.size
         print "-" * 79
-        print " " * 52 + "{num} files, {size:6.3f} GiB".format(
+        print " " * 49 + "{num:>4} files, {size:6.3f} GiB".format(
                         num=len(maps), size=size_total / 1024**3)
 
     def list_server_maps(self, patterns, long_form=False):
