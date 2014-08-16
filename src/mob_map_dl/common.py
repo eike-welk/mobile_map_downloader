@@ -30,6 +30,9 @@ from __future__ import absolute_import
 import time
 from collections import namedtuple
 import sys
+import os
+import os.path as path
+import platform
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -126,3 +129,38 @@ def items_sorted(in_dict):
     items.sort(key=lambda i: i[0])
     return items
 
+
+class PartFile(file):
+    """
+    Self renaming "*.part" file.
+    
+    When the file is opened in the constructor a ".part" suffix is appended
+    to the file name. When the file is closed the file is renamed to the 
+    name that was passed in the constructor. 
+    
+    The constructor takes the same arguments as built in function ``open``.
+    """
+    def __init__(self, fname, *args):
+        self.orig_name = fname
+        file.__init__(self, fname + ".part", *args)
+        
+    def close(self):
+        """
+        Close the file and rename it to the original name, without the ".part"
+        suffix.
+        
+        Details on writing to temporary file and renaming from Stackoverflow:
+            http://stackoverflow.com/questions/2333872/atomic-writing-to-file-with-python
+        """
+        part_name = self.name
+        self.flush()
+#        os.fsync(self.fileno())  #Force write of file to disk.
+        close_ret = file.close(self)
+        
+        #On windows renaming fails, if a file with the new name already exists.
+        #    https://docs.python.org/2/library/os.html#os.rename
+        if platform.system() == 'Windows' and path.exists(self.orig_name):
+            os.remove(self.orig_name)
+            
+        os.rename(part_name, self.orig_name)
+        return close_ret

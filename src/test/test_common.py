@@ -33,6 +33,7 @@ from __future__ import absolute_import
 import time
 import os
 import os.path as path
+import shutil
 from pprint import pprint
 
 
@@ -49,6 +50,29 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
+#def create_writable_test_dirs(idx):
+#    """
+#    Create temporary writable directories with test data. Different names 
+#    for each test enable parallel execution of tests.
+#    
+#    The following directories are created:
+#    
+#    "../../test_tmp/mob_map_dl" + idx 
+#        Application directory with test data.
+#        
+#    "../../test_tmp/TEST-DEVICE" + idx
+#        Device directory  with test data.
+#    """
+#    idx = str(idx)
+#    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
+#    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
+#    shutil.rmtree(test_app_dir, ignore_errors=True)
+#    shutil.rmtree(test_dev_dir, ignore_errors=True)
+#    shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
+#    shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
+#    return test_app_dir, test_dev_dir
+    
+    
 def test_TextProgressBar():
     """
     Test class TextProgressBar
@@ -78,8 +102,42 @@ def test_items_sorted():
     assert ds[3] == ("d", 4)
 
 
+def test_PartFile():
+    from mob_map_dl.common import PartFile
+    
+    print "Start"
+    test_file = relative_path("../../test_tmp/test_PartFile.txt")
+    if path.exists(test_file):
+        os.remove(test_file)
+    
+    #No file with final name exists.
+    f = PartFile(test_file, "wb")
+    
+    assert path.exists(test_file + ".part")
+    
+    f.write("foobar")
+    f.close()
+    
+    assert path.exists(test_file)
+    assert not path.exists(test_file + ".part")
+    assert open(test_file).read() == "foobar"
+    
+    #File with final name exist (from last test)
+    f = PartFile(test_file, "wb")
+    
+    assert path.exists(test_file + ".part")
+    
+    f.write("Boozalam!")
+    f.close()
+    
+    assert path.exists(test_file)
+    assert not path.exists(test_file + ".part")
+    assert open(test_file).read() == "Boozalam!"
+    
+    
 if __name__ == "__main__":
 #    test_TextProgressBar()
-    test_items_sorted()
+#    test_items_sorted()
+    test_PartFile()
     
     pass

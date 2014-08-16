@@ -100,7 +100,7 @@ class AppHighLevel(object):
                 self.installers = {
                                 "osmand": OsmandInstaller(self.mobile_device)}
             except OSError, err:
-                print "Error while initializing mobile device:"
+                print "Error while connecting to mobile device:"
                 print err
                 self.installers = {}
         else:
