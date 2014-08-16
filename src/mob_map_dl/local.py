@@ -34,7 +34,7 @@ from os import path
 import zipfile
 import datetime
 
-from mob_map_dl.common import MapMeta, TextProgressBar
+from mob_map_dl.common import MapMeta, TextProgressBar, PartFile
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -160,7 +160,7 @@ class OsmandManager(object):
         disp_name: str
             Canonical name of the map. Used in the progress bar.
         """
-        fext = open(map_path, "wb")
+        fext = PartFile(map_path, "wb")
         fzip, size_total, _ = self.get_map_extractor(arch_path)
         
         size_mib = round(size_total / 1024**2, 1)
@@ -178,6 +178,7 @@ class OsmandManager(object):
             fext.write(buf)
             size_down += len(buf)
             
+        fzip.close()
         fext.close()
         progress.update_final(size_down, "Installed")
 

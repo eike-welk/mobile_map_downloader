@@ -33,8 +33,7 @@ import lxml.html
 import dateutil.parser
 import urlparse
 
-from mob_map_dl.common import MapMeta
-from mob_map_dl.common import TextProgressBar
+from mob_map_dl.common import MapMeta, TextProgressBar, PartFile
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -153,7 +152,7 @@ class OsmandDownloader(object):
               once per second.  
         """
         fsrv = urllib2.urlopen(srv_url)
-        floc = open(loc_name, "wb")
+        floc = PartFile(loc_name, "wb")
         
         meta = fsrv.info()
         size_total = int(meta.getheaders("Content-Length")[0])
@@ -171,6 +170,7 @@ class OsmandDownloader(object):
             floc.write(buf)
             size_down += len(buf)
             
+        fsrv.close()
         floc.close()
         progress.update_final(size_down, "Downloaded")
 
