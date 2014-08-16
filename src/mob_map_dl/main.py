@@ -140,7 +140,8 @@ class AppHighLevel(object):
     #--- Information Retrieval 
     def get_filtered_map_list(self, lister_dict, patterns):
         """
-        Create a list of maps, that match certain patterns.
+        Create a list of maps, that match certain patterns. Matching is
+        not case sensitive.
         
         Usage::
             
@@ -168,11 +169,14 @@ class AppHighLevel(object):
         for _, downloader in items_sorted(lister_dict):
             maps = downloader.get_file_list()
             all_maps += maps
-        #Filter the names for the patterns.
+        #Filter the names for the patterns. 
         all_matches = []
         for pattern in patterns:
-            all_matches += [map_ for map_ in all_maps 
-                            if fnmatch.fnmatchcase(map_.disp_name, pattern)]
+            pattern_low = pattern.lower()
+            for map_ in all_maps:
+                name_low = map_.disp_name.lower()
+                if fnmatch.fnmatchcase(name_low, pattern_low):
+                    all_matches.append(map_)
         return all_matches
 
     #--- File manipulation

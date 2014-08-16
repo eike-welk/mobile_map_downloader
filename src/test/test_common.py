@@ -50,29 +50,6 @@ def relative_path(*path_comps):
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
 
-#def create_writable_test_dirs(idx):
-#    """
-#    Create temporary writable directories with test data. Different names 
-#    for each test enable parallel execution of tests.
-#    
-#    The following directories are created:
-#    
-#    "../../test_tmp/mob_map_dl" + idx 
-#        Application directory with test data.
-#        
-#    "../../test_tmp/TEST-DEVICE" + idx
-#        Device directory  with test data.
-#    """
-#    idx = str(idx)
-#    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
-#    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
-#    shutil.rmtree(test_app_dir, ignore_errors=True)
-#    shutil.rmtree(test_dev_dir, ignore_errors=True)
-#    shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
-#    shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
-#    return test_app_dir, test_dev_dir
-    
-    
 def test_TextProgressBar():
     """
     Test class TextProgressBar
