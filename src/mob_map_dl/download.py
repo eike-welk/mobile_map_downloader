@@ -120,7 +120,8 @@ class OsmandDownloader(object):
             map_meta = MapMeta(disp_name=self.make_disp_name(link.text), 
                                full_name=download_url, 
                                size=float(row[2].text) * 1024**2, #[Byte]
-                               time=dateutil.parser.parse(row[1].text), 
+                               time=dateutil.parser.parse(row[1].text,
+                                                          dayfirst=True), 
                                description=row[3].text, 
                                map_type="osmand")
             map_metas.append(map_meta)
