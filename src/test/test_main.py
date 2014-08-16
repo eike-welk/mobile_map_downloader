@@ -366,10 +366,10 @@ if __name__ == "__main__":
 #    test_AppHighLevel_delete_file_mobile()
 #    test_AppHighLevel_delete_file_local()
 #    test_AppHighLevel_plan_work()
-    test_AppHighLevel_filter_possible_work()
+#    test_AppHighLevel_filter_possible_work()
 #    test_AppHighLevel_download_install()
 #    test_AppHighLevel_uninstall()
-#    test_ConsoleAppMain_list_server_maps()
+    test_ConsoleAppMain_list_server_maps()
 #    test_ConsoleAppMain_parse_aguments()
     
     pass
