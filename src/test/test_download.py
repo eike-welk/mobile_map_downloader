@@ -34,6 +34,7 @@ import time
 import os
 import os.path as path
 from pprint import pprint
+import urllib2
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -69,6 +70,31 @@ def find_index(list_like, search_val, key=lambda x:x):
         return None
     
     
+def test_BaseDownloader_download_file():
+    "Test class OsmandDownloader: Downloading of files from Osmand server."
+    from mob_map_dl.download import BaseDownloader
+    
+    print "Start download_file"
+    test_map_name = relative_path("../../test_tmp/test_1.obf.zip")
+    try: os.remove(test_map_name)
+    except: pass
+    assert not path.exists(test_map_name)
+    
+    #File size 0.2 MiB
+    url = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
+#    #File size 3.0 MiB
+#    url = "http://download.osmand.net/download.php?standard=yes&file=Jamaica_centralamerica_2.obf.zip"
+    
+    d = BaseDownloader()
+    d.download_file(url, test_map_name, "test-file-name.foo")
+    
+    #Test name and size of downloaded file
+    assert path.isfile(test_map_name)
+    file_size = path.getsize(test_map_name)/1024**2
+    print "file size [MiB]:", file_size
+    assert round(file_size, 1) == 0.2
+    
+    
 def test_OsmandDownloader_get_file_list():
     "Test class OsmandDownloader: Listing of files that can be downloaded."
     from mob_map_dl.download import OsmandDownloader
@@ -95,32 +121,16 @@ def test_OsmandDownloader_get_file_list():
     assert l[-1].disp_name == "osmand/Zimbabwe_africa_2.obf"
     #Number of files must be in certain range.
     assert 500 < len(l) < 550
-    
-    
-def test_OsmandDownloader_download_file():
-    "Test class OsmandDownloader: Downloading of files from Osmand server."
-    from mob_map_dl.download import OsmandDownloader
-    
-    print "Start download_file"
-    test_map_name = relative_path("../../test_tmp/test_1.obf.zip")
-    try: os.remove(test_map_name)
-    except: pass
-    assert not path.exists(test_map_name)
-    
-#    #File size 0.2 MiB
-#    url = "http://download.osmand.net/download.php?standard=yes&file=Monaco_europe_2.obf.zip"
-    #File size 3.0 MiB
-    url = "http://download.osmand.net/download.php?standard=yes&file=Jamaica_centralamerica_2.obf.zip"
-    
-    d = OsmandDownloader()
-    d.download_file(url, test_map_name, "test-file-name.foo")
-    
-    #Test name and size of downloaded file
-    assert path.isfile(test_map_name)
-    file_size = path.getsize(test_map_name)/1024**2
-    print "file size [MiB]:", file_size
-    assert round(file_size, 1) == 3.0
-    
+        
+    #Test if the extracted URLs are correct
+    idx = find_index(l, "osmand/Monaco_europe_2.obf", get_disp_name)
+    url = l[idx].full_name
+    fsrv = urllib2.urlopen(url)
+    map_zip = fsrv.read()
+    len_mib = len(map_zip) / 1024**2
+    print len(map_zip), "B", len_mib, "MiB", round(len_mib, 1), "MiB rounded"
+    assert round(len_mib, 1) == 0.2
+
     
 def test_OpenandromapsDownloader_make_disp_name():
     from mob_map_dl.download import OpenandromapsDownloader
@@ -166,11 +176,20 @@ def test_OpenandromapsDownloader_get_file_list():
     assert l[-1].disp_name == "oam/africa/zimbabwe"
     #Number of files must be in certain range.
     assert 200 < len(l) < 250
-
     
+    #Test if the extracted URLs are correct
+    idx = find_index(l, "oam/SouthAmerica/bermuda", get_disp_name)
+    url = l[idx].full_name
+    fsrv = urllib2.urlopen(url)
+    map_zip = fsrv.read()
+    len_mib = len(map_zip) / 1024**2
+    print len(map_zip), "B", len_mib, "MiB", round(len_mib, 1), "MiB rounded"
+    assert round(len_mib, 1) == 1.9
+
+
 if __name__ == "__main__":
-    test_OsmandDownloader_get_file_list()
-#    test_OsmandDownloader_download_file()
+    test_BaseDownloader_download_file()
+#    test_OsmandDownloader_get_file_list()
 #    test_OpenandromapsDownloader_make_disp_name()
 #    test_OpenandromapsDownloader_get_file_list()
     
