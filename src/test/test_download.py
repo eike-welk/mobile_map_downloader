@@ -92,7 +92,7 @@ def test_OsmandDownloader_get_file_list():
                       key=get_disp_name) is not None
     #Test the names of first & last file
     assert l[0].disp_name == "osmand/Afghanistan_asia_2.obf"
-    assert l[-1].disp_name == "osmand/zh_0.voice"
+    assert l[-1].disp_name == "osmand/Zimbabwe_africa_2.obf"
     #Number of files must be in certain range.
     assert 500 < len(l) < 550
     
@@ -122,8 +122,56 @@ def test_OsmandDownloader_download_file():
     assert round(file_size, 1) == 3.0
     
     
+def test_OpenandromapsDownloader_make_disp_name():
+    from mob_map_dl.download import OpenandromapsDownloader
+    
+    print "Start"
+    down = OpenandromapsDownloader()
+
+    u1 = "http://www.openandromaps.org/maps/Germany/Germany_Mid_hike.zip"
+    u2 = "http://www.openandromaps.org/maps/europe/France_North.zip"
+    n1 = "oam/Germany/Germany_Mid_hike" 
+    n2 = "oam/europe/France_North"
+    
+    n = down.make_disp_name(u1)
+    assert n == n1
+    
+    n = down.make_disp_name(u2)
+    assert n == n2
+
+
+def test_OpenandromapsDownloader_get_file_list():
+    from mob_map_dl.download import OpenandromapsDownloader
+    
+    print "Start"
+    down = OpenandromapsDownloader()
+
+    l = down.get_file_list()
+    
+    pprint(l)
+    print len(l)
+    
+    #Test if some files exist
+    get_disp_name = lambda e: e.disp_name
+    assert find_index(l, "oam/Russia/Central", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/SouthAmerica/Mexico", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/africa/kenya", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/europe/France_South", 
+                      key=get_disp_name) is not None
+    #Test the names of first & last file
+    assert l[0].disp_name == "oam/europe/Alps"
+    assert l[-1].disp_name == "oam/africa/zimbabwe"
+    #Number of files must be in certain range.
+    assert 200 < len(l) < 250
+
+    
 if __name__ == "__main__":
     test_OsmandDownloader_get_file_list()
 #    test_OsmandDownloader_download_file()
+#    test_OpenandromapsDownloader_make_disp_name()
+#    test_OpenandromapsDownloader_get_file_list()
     
     pass

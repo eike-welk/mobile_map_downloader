@@ -44,7 +44,7 @@ Usage
 
 List the maps of France, that the program can download::
 
-    dlmap ls "*France*"
+    dlmap lss "*France*"
 
 Patterns with wildcards should be quoted, because the shell might fill them in. 
 

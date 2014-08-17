@@ -35,7 +35,7 @@ import os.path as path
 import os
 
 from mob_map_dl.common import items_sorted
-from mob_map_dl.download import OsmandDownloader
+from mob_map_dl.download import OsmandDownloader, OpenandromapsDownloader
 from mob_map_dl.local import OsmandManager
 from mob_map_dl.install import OsmandInstaller
 
@@ -86,7 +86,8 @@ class AppHighLevel(object):
             self.mobile_device = mobile_device
             
         #Create the low level components
-        self.downloaders = {"osmand": OsmandDownloader()}
+        self.downloaders = {"osmand": OsmandDownloader(),
+                            "oam": OpenandromapsDownloader()}
         
         if not self.find_app_directory():
             self.create_app_directory()
@@ -169,6 +170,7 @@ class AppHighLevel(object):
         for _, downloader in items_sorted(lister_dict):
             maps = downloader.get_file_list()
             all_maps += maps
+        all_maps.sort(key=lambda m: m.disp_name.lower())
         #Filter the names for the patterns. 
         all_matches = []
         for pattern in patterns:
