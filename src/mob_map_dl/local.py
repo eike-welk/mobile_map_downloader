@@ -49,14 +49,13 @@ class OsmandManager(object):
     """
     Manage locally stored maps for Osmand.
     """    
-    def __init__(self, download_dir_root):
-#        self.download_dir_root = download_dir_root
-        self.download_dir = path.join(download_dir_root, "osmand")
+    def __init__(self, application_dir):
+#        self.application_dir = application_dir
+        self.download_dir = path.join(application_dir, "osmand")
         
         #Create own subdir of download dir if it does not exist.
         if not path.exists(self.download_dir):
             os.mkdir(self.download_dir)
-    
 
     def make_disp_name(self, file_name_path):
         """
@@ -182,3 +181,122 @@ class OsmandManager(object):
         fext.close()
         progress.update_final(size_down, "Installed")
 
+
+class OpenandromapManager(object):
+    """
+    Manage locally stored maps for Openandromap.
+    """    
+    def __init__(self, application_dir):
+#        self.application_dir = application_dir
+        self.download_dir = path.join(application_dir, "oam")
+        
+        #Create own subdir of download dir if it does not exist.
+        if not path.exists(self.download_dir):
+            os.mkdir(self.download_dir)
+#        subdirs = ["africa", "asia", "canada", "europe", "Germany", "oceania", 
+#                   "Russia", "SouthAmerica", "usa"]
+#        for subdir in subdirs:
+#            try:
+#                os.mkdir(path.join(self.download_dir, subdir))
+#            except OSError: pass
+        
+    def make_disp_name(self, file_name_path):
+        """
+        Create a canonical name from a file name or path of a locally stored
+        zipped map. 
+        
+        The canonical name is used in the user interface.
+        """
+        _, file_name = path.split(file_name_path)
+        disp_name = "oam/" + file_name.rsplit(".", 1)[0]
+        return disp_name
+    
+    def make_full_name(self, disp_name):
+        """
+        Create a path to a locally stored map from its canonical name. 
+        
+        The canonical name has the form:
+            "oam/europe_France_North"
+            "oam/asia_Kazakhstan"
+            
+        The full name has the form:
+            "app-download-dir/oam/europe_France_North.zip"
+            "app-download-dir/oam/asia_Kazakhstan.zip"
+        """
+        _, fname = disp_name.split("/")
+        full_name = path.join(self.download_dir, fname + ".zip")
+        return full_name
+        
+    def get_file_list(self):
+        """
+        Return a list of locally stored maps. Maps are searched in 
+        ``self.download_dir``.
+        
+        Return
+        -------
+        
+        list[MapMeta]
+        """
+        dir_names = os.listdir(self.download_dir)
+        map_names = fnmatch.filter(dir_names, "*.map")
+        map_names.sort()
+        
+        map_metas = []
+        for name in map_names:
+            archive_name = path.join(self.download_dir, name)
+            disp_name = self.make_disp_name(name)
+            _, size_total, date_time = self.get_map_extractor(archive_name)
+            map_meta = MapMeta(disp_name=disp_name, 
+                               full_name=archive_name, 
+                               size=size_total, 
+                               time=date_time, 
+                               description="", 
+                               map_type="oam")
+            map_metas.append(map_meta)
+            
+        return map_metas
+        
+        
+    def get_map_extractor(self, archive_path):
+        """
+        Create file like object, that extracts the map from the zip file.
+        Additionally returns some metadata. 
+        
+        Argument
+        --------
+        
+        archive_path: str
+            Path to archive that contains the map.
+        
+        Returns
+        -------
+        
+        fzip: file like object
+            Object that extracts a map from a zip file. Behaves like a file.
+            
+        size_total: int
+            Uncompressed size of the map.
+            
+        mod_time: date_time.date_time
+            Modification time of the map, from the zip archive.
+        """
+        zip_container = zipfile.ZipFile(archive_path, "r")
+#        zip_fnames = zip_container.namelist()
+#        print zip_fnames
+        zip_finfos = zip_container.infolist()
+        
+        for map_info in zip_finfos:
+            if map_info.filename.endswith(".map"):
+                break
+        else:
+            raise ValueError("No *.map file found in archive.")
+        
+        zip_fname = map_info.filename                      #IGNORE:W0631
+        size_total = map_info.file_size                    #IGNORE:W0631
+        mod_time = datetime.datetime(*map_info.date_time)  #IGNORE:W0631
+        fzip = zip_container.open(zip_fname, "r")
+        
+        return fzip, size_total, mod_time
+        
+
+        

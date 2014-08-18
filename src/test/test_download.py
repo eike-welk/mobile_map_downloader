@@ -140,8 +140,8 @@ def test_OpenandromapsDownloader_make_disp_name():
 
     u1 = "http://www.openandromaps.org/maps/Germany/Germany_Mid_hike.zip"
     u2 = "http://www.openandromaps.org/maps/europe/France_North.zip"
-    n1 = "oam/Germany/Germany_Mid_hike" 
-    n2 = "oam/europe/France_North"
+    n1 = "oam/Germany_Germany_Mid_hike" 
+    n2 = "oam/europe_France_North"
     
     n = down.make_disp_name(u1)
     assert n == n1
@@ -161,34 +161,42 @@ def test_OpenandromapsDownloader_get_file_list():
     pprint(l)
     print len(l)
     
-    #Test if some files exist
-    get_disp_name = lambda e: e.disp_name
-    assert find_index(l, "oam/Russia/Central", 
-                      key=get_disp_name) is not None
-    assert find_index(l, "oam/SouthAmerica/Mexico", 
-                      key=get_disp_name) is not None
-    assert find_index(l, "oam/africa/kenya", 
-                      key=get_disp_name) is not None
-    assert find_index(l, "oam/europe/France_South", 
-                      key=get_disp_name) is not None
-    #Test the names of first & last file
-    assert l[0].disp_name == "oam/europe/Alps"
-    assert l[-1].disp_name == "oam/africa/zimbabwe"
     #Number of files must be in certain range.
     assert 200 < len(l) < 250
+    #Test if some files exist
+    get_disp_name = lambda e: e.disp_name
+    assert find_index(l, "oam/europe_France_South", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/Germany_Germany_Mid_hike", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/Russia_Central", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/usa_California", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/canada_Saskatchewan", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/SouthAmerica_Mexico", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/oceania_NewZealand", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/asia_Kazakhstan", 
+                      key=get_disp_name) is not None
+    assert find_index(l, "oam/africa_kenya", 
+                      key=get_disp_name) is not None
     
-    #Test if the extracted URLs are correct
-    idx = find_index(l, "oam/SouthAmerica/bermuda", get_disp_name)
+    #Test if the extracted URLs are correct, (2 MiB download)
+    idx = find_index(l, "oam/SouthAmerica_bermuda", get_disp_name)
     url = l[idx].full_name
     fsrv = urllib2.urlopen(url)
     map_zip = fsrv.read()
     len_mib = len(map_zip) / 1024**2
     print len(map_zip), "B", len_mib, "MiB", round(len_mib, 1), "MiB rounded"
-    assert round(len_mib, 1) == 1.9
+    #Test rough dimensions, exact size changes with every new revision
+    assert 1.8 < len_mib < 2.2
 
 
 if __name__ == "__main__":
-    test_BaseDownloader_download_file()
+#    test_BaseDownloader_download_file()
 #    test_OsmandDownloader_get_file_list()
 #    test_OpenandromapsDownloader_make_disp_name()
 #    test_OpenandromapsDownloader_get_file_list()

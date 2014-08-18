@@ -141,11 +141,51 @@ def test_OsmandManager_extract_map():
     file_size = path.getsize(out_name)
     print "file size [MiB]:", file_size / 1024**2
     assert file_size == 4518034
+
+
+def test_OpenandromapManager_name_conversion():
+    """OpenandromapManager: Test the name conversion functions."""
+    from mob_map_dl.local import OpenandromapManager
     
+    print "Start."
+    test_app_dir, test_dev_dir = create_writable_test_dirs("l4")
+    d1 = "oam/europe_France_North"
+    d2 = "oam/asia_Kazakhstan"
+    f1 = path.join(test_app_dir, "oam/europe_France_North.zip")
+    f2 = path.join(test_app_dir, "oam/asia_Kazakhstan.zip")
+    
+    mgr = OpenandromapManager(test_app_dir)
+    
+    assert mgr.make_disp_name(f1) == d1
+    assert mgr.make_disp_name(f2) == d2
+    assert mgr.make_full_name(d1) == f1
+    assert mgr.make_full_name(d2) == f2
+    
+    
+def test_OpenandromapManager_get_map_extractor():
+    """OpenandromapManager: Test the name conversion functions."""
+    from mob_map_dl.local import OpenandromapManager
+    
+    print "Start."
+    test_app_dir, test_dev_dir = create_writable_test_dirs("l5")
+#    arch_path = path.join(test_app_dir, "oam/usa_Yellowstone_NP.zip")
+    arch_path = path.join(test_app_dir, "oam/SouthAmerica_bermuda.zip")
+    
+    mgr = OpenandromapManager(test_app_dir)
+    fzip, size_total, _ = mgr.get_map_extractor(arch_path)
+    map_content = fzip.read()
+    
+    size_mib = len(map_content) / 1024**2
+    print "size:", size_mib, "Mib"
+    assert 0.4 < size_mib < 0.6
+    assert size_total == len(map_content)
+
 
 if __name__ == "__main__":
 #    test_OsmandManager_get_file_list()
 #    test_OsmandManager_get_map_extractor()
-    test_OsmandManager_extract_map()
+#    test_OsmandManager_extract_map()
+#    test_OpenandromapManager_name_conversion()
+    test_OpenandromapManager_get_map_extractor()
     
     pass

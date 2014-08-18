@@ -50,6 +50,9 @@ class BaseDownloader(object):
     """ 
     list_url = "Put URL of human readable map list here."
     
+    def __init__(self):
+        pass
+    
     def make_disp_name(self, server_name):
         """
         Create a canonical name from the name, that the server supplies.
@@ -138,8 +141,7 @@ class OsmandDownloader(BaseDownloader):
     list_url = "http://download.osmand.net/list.php"
     
     def __init__(self):
-        pass
-        
+        BaseDownloader.__init__(self)
     
     def make_disp_name(self, server_name):
         """
@@ -157,7 +159,6 @@ class OsmandDownloader(BaseDownloader):
         #The server delivers name of the form "Country_Name.obf.zip"
         disp_name = "osmand/" + server_name.rsplit(".", 1)[0]
         return disp_name
-    
     
     def get_file_list(self):
         """
@@ -237,6 +238,9 @@ class OpenandromapsDownloader(BaseDownloader):
 #                 "http://www.openandromaps.org/downloads/ubersichts-karten"
                  ]
 
+    def __init__(self):
+        BaseDownloader.__init__(self)
+    
     def make_disp_name(self, server_name):
         """
         Create a canonical name from the name, that the server supplies.
@@ -247,8 +251,8 @@ class OpenandromapsDownloader(BaseDownloader):
             "http://www.openandromaps.org/maps/europe/France_North.zip"
             
         The corresponding canonical names are:
-            "oam/Germany/Germany_Mid_hike" 
-            "oam/europe/France_North"
+            "oam/Germany_Germany_Mid_hike" 
+            "oam/europe_France_North"
             
         Argument
         --------
@@ -262,9 +266,9 @@ class OpenandromapsDownloader(BaseDownloader):
         str
             The canonical name.
         """
-        url_zip = server_name.rsplit(".",1)[0]
-        tail2_lst = url_zip.split("/")[-2:]
-        disp_name = "oam/" + "/".join(tail2_lst)
+        nozip = server_name.rsplit(".",1)[0]
+        tail2_lst = nozip.split("/")[-2:]
+        disp_name = "oam/" + "_".join(tail2_lst)
         return disp_name
     
     def get_file_list(self):
