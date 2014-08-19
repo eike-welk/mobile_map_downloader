@@ -93,9 +93,9 @@ def test_AppHighLevel_get_filtered_map_list():
     #List all locally downloaded maps.
     maps = app.get_filtered_map_list(app.local_managers, ["*"])
     pprint(maps)
-    assert len(maps) == 2
-    assert maps[0].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
-    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf"
+    assert len(maps) == 3
+    assert maps[1].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
+    assert maps[2].disp_name == "osmand/Monaco_europe_2.obf"
     assert maps[0].full_name.find("test_data/maps") > 0
     
     #List all maps that are installed on the current device.

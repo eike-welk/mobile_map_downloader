@@ -36,7 +36,7 @@ import os
 
 from mob_map_dl.common import items_sorted
 from mob_map_dl.download import OsmandDownloader, OpenandromapsDownloader
-from mob_map_dl.local import OsmandManager
+from mob_map_dl.local import OsmandManager, OpenandromapsManager
 from mob_map_dl.install import OsmandInstaller
 
 
@@ -92,7 +92,9 @@ class AppHighLevel(object):
         if not self.find_app_directory():
             self.create_app_directory()
         if self.app_directory:
-            self.local_managers = {"osmand": OsmandManager(self.app_directory)}
+            self.local_managers = {
+                               "osmand": OsmandManager(self.app_directory),
+                               "oam": OpenandromapsManager(self.app_directory)}
         else:
             print "No writable download directory! No downloads are possible."
             

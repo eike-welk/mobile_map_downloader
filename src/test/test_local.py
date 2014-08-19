@@ -86,6 +86,25 @@ def create_writable_test_dirs(idx):
 #    d.download_file(srvname, locname, "osmand/Jamaica_centralamerica_2")
 
 
+def test_OsmandManager_name_conversion():
+    """OpenandromapsManager: Test the name conversion functions."""
+    from mob_map_dl.local import OsmandManager
+    
+    print "Start."
+    test_app_dir, _ = create_writable_test_dirs("l4")
+    d1 = "osmand/europe_France_North.obf"
+    d2 = "osmand/asia_Kazakhstan.obf"
+    f1 = path.join(test_app_dir, "osmand/europe_France_North.obf.zip")
+    f2 = path.join(test_app_dir, "osmand/asia_Kazakhstan.obf.zip")
+    
+    mgr = OsmandManager(test_app_dir)
+    
+    assert mgr.make_disp_name(f1) == d1
+    assert mgr.make_disp_name(f2) == d2
+    assert mgr.make_full_name(d1) == f1
+    assert mgr.make_full_name(d2) == f2
+    
+    
 def test_OsmandManager_get_file_list():
     "Test class OsmandManager: Extracting maps from downloaded archives."
 
@@ -144,8 +163,8 @@ def test_OsmandManager_extract_map():
 
 
 def test_OpenandromapManager_name_conversion():
-    """OpenandromapManager: Test the name conversion functions."""
-    from mob_map_dl.local import OpenandromapManager
+    """OpenandromapsManager: Test the name conversion functions."""
+    from mob_map_dl.local import OpenandromapsManager
     
     print "Start."
     test_app_dir, test_dev_dir = create_writable_test_dirs("l4")
@@ -154,7 +173,7 @@ def test_OpenandromapManager_name_conversion():
     f1 = path.join(test_app_dir, "oam/europe_France_North.zip")
     f2 = path.join(test_app_dir, "oam/asia_Kazakhstan.zip")
     
-    mgr = OpenandromapManager(test_app_dir)
+    mgr = OpenandromapsManager(test_app_dir)
     
     assert mgr.make_disp_name(f1) == d1
     assert mgr.make_disp_name(f2) == d2
@@ -163,15 +182,15 @@ def test_OpenandromapManager_name_conversion():
     
     
 def test_OpenandromapManager_get_map_extractor():
-    """OpenandromapManager: Test the name conversion functions."""
-    from mob_map_dl.local import OpenandromapManager
+    """OpenandromapsManager: Test the name conversion functions."""
+    from mob_map_dl.local import OpenandromapsManager
     
     print "Start."
     test_app_dir, test_dev_dir = create_writable_test_dirs("l5")
 #    arch_path = path.join(test_app_dir, "oam/usa_Yellowstone_NP.zip")
     arch_path = path.join(test_app_dir, "oam/SouthAmerica_bermuda.zip")
     
-    mgr = OpenandromapManager(test_app_dir)
+    mgr = OpenandromapsManager(test_app_dir)
     fzip, size_total, _ = mgr.get_map_extractor(arch_path)
     map_content = fzip.read()
     
@@ -182,10 +201,11 @@ def test_OpenandromapManager_get_map_extractor():
 
 
 if __name__ == "__main__":
+    test_OsmandManager_name_conversion()
 #    test_OsmandManager_get_file_list()
 #    test_OsmandManager_get_map_extractor()
 #    test_OsmandManager_extract_map()
 #    test_OpenandromapManager_name_conversion()
-    test_OpenandromapManager_get_map_extractor()
+#    test_OpenandromapManager_get_map_extractor()
     
     pass
