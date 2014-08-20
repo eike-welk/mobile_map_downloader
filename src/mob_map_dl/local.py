@@ -49,7 +49,11 @@ class BaseManager(object):
     """
     Base class for local manager objects.
     """
-    def __init__(self):
+    def __init__(self, _application_dir=None):
+        """
+        Object is initialized with the application's directory by top level, 
+        computes its own sub-directory, and stores it.
+        """
         self.download_dir = ""
         #Path to directory where the maps are stored. Is accessed by command: 
         # ``dlmap lsd -l`` 

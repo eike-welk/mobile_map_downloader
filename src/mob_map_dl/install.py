@@ -46,7 +46,12 @@ logging.Formatter.converter = time.gmtime
 
 class BaseInstaller(object):
     """Base class of installers."""
-    def __init__(self):
+    def __init__(self, _device_dir=None):
+        """
+        Object is initialized with the mobile device's directory by the top 
+        level, computes sub-directory where the maps are installed, 
+        and stores it.
+        """
         self.install_dir = ""
         #Directory where the maps are installed. Is accessed by command: 
         # ``dlmap lsd -l`` 

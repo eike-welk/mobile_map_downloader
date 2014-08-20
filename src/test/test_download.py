@@ -33,6 +33,7 @@ from __future__ import absolute_import
 import time
 import os
 import os.path as path
+import shutil
 from pprint import pprint
 import urllib2
 
@@ -70,6 +71,29 @@ def find_index(list_like, search_val, key=lambda x:x):
         return None
     
     
+def create_writable_test_dirs(idx):
+    """
+    Create temporary writable directories with test data. Different names 
+    for each test enable parallel execution of tests.
+    
+    The following directories are created:
+    
+    "../../test_tmp/mob_map_dl" + idx 
+        Application directory with test data.
+        
+    "../../test_tmp/TEST-DEVICE" + idx
+        Device directory  with test data.
+    """
+    idx = str(idx)
+    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
+    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
+    shutil.rmtree(test_app_dir, ignore_errors=True)
+    shutil.rmtree(test_dev_dir, ignore_errors=True)
+    shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
+    shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
+    return test_app_dir, test_dev_dir
+
+
 def test_BaseDownloader_download_file():
     "Test class OsmandDownloader: Downloading of files from Osmand server."
     from mob_map_dl.download import BaseDownloader
@@ -132,6 +156,59 @@ def test_OsmandDownloader_get_file_list():
     assert round(len_mib, 1) == 0.2
 
     
+def test_OsmandDownloader_chaching_mechanism():
+    """
+    Test the caching mechanism with ``OpenandromapsDownloader``.
+    
+    The caching mechanism is really built into ``BaseDownloader``, however
+    it must be tested with a complete downloader class, that has a functioning 
+    implementation of ``get_file_list``.
+    
+    We use ``OsmandDownloader`` for the test because it is fairly fast.
+    Actually downloading the and parsing the HTML is nearly as fast (0.3 s) 
+    than un-pickling the cached list (0.05 s). The test may fail on a computer 
+    with a really fast Internet connection. 
+    
+    The caching mechanism is intended for ``OpenandromapsDownloader``, which
+    needs several seconds to download and parse the HTML, because the server 
+    answers with several 100 Kib of HTML.
+    """
+    from mob_map_dl.download import OsmandDownloader
+    
+    print "Start"
+    app_dir, _ = create_writable_test_dirs("d1")
+    cache_time = 2
+    
+    dl = OsmandDownloader(app_dir, cache_time)
+    
+    #Download list, parse HTML, write cache file, should take long.
+    t0 = time.time()
+    _ = dl.get_file_list()
+    t1 = time.time()
+    delta1 = t1 - t0 
+    print "Get file list, 1st time:", delta1, "s"
+    
+    #Now return cached list, should take short time.
+    _ = dl.get_file_list()
+    t2 = time.time()
+    delta2 = t2 - t1
+    print "Get file list, 2nd time:", delta2, "s"
+    assert delta2 < delta1
+    assert delta2 < 0.1
+    
+    print "Sleeping..."
+    time.sleep(cache_time)
+    
+    #Cache is expired, now it should take long again.
+    t3 = time.time()
+    _ = dl.get_file_list()
+    t4 = time.time()
+    delta4 = t4 - t3
+    print "Get file list, after sleep:", delta4, "s"
+    assert delta4 > delta2
+    assert abs(delta1 - delta4) < 0.15
+    
+
 def test_OpenandromapsDownloader_make_disp_name():
     from mob_map_dl.download import OpenandromapsDownloader
     
@@ -163,7 +240,7 @@ def test_OpenandromapsDownloader_get_file_list():
     
     #Number of files must be in certain range.
     assert 200 < len(l) < 250
-    #Test if some files exist
+    #Test if some files exist. One file from each HTML page.
     get_disp_name = lambda e: e.disp_name
     assert find_index(l, "oam/europe_France_South", 
                       key=get_disp_name) is not None
@@ -198,6 +275,7 @@ def test_OpenandromapsDownloader_get_file_list():
 if __name__ == "__main__":
 #    test_BaseDownloader_download_file()
 #    test_OsmandDownloader_get_file_list()
+    test_OsmandDownloader_chaching_mechanism()
 #    test_OpenandromapsDownloader_make_disp_name()
 #    test_OpenandromapsDownloader_get_file_list()
     

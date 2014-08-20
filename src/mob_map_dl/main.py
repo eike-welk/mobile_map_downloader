@@ -85,12 +85,13 @@ class AppHighLevel(object):
         if mobile_device:
             self.mobile_device = mobile_device
             
-        #Create the low level components
-        self.downloaders = {"osmand": OsmandDownloader(),
-                            "oam": OpenandromapsDownloader()}
-        
         if not self.find_app_directory():
             self.create_app_directory()
+            
+        #Create downloaders, they can function without ``app_directory``
+        self.downloaders = {"osmand": OsmandDownloader(self.app_directory),
+                            "oam": OpenandromapsDownloader(self.app_directory)}
+        #Create local managers, they need a directory to store the maps
         if self.app_directory:
             self.local_managers = {
                                "osmand": OsmandManager(self.app_directory),

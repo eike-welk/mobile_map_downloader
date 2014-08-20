@@ -29,6 +29,8 @@ from __future__ import absolute_import
 
 import time
 import urllib2
+from os import path
+import cPickle
 import lxml.html
 import dateutil.parser
 import urlparse
@@ -48,10 +50,16 @@ class BaseDownloader(object):
     """
     Base class for objects that download maps from the Internet.
     """ 
-    list_url = "Put URL of human readable map list here."
+    list_url = "Put URL of map list here."
     
-    def __init__(self):
-        pass
+    def __init__(self, application_dir=None, cache_time=3600):
+        """
+        Object is initialized with the application's directory by top level.
+        """
+        self.application_dir = application_dir
+        #Directory of the application. Used to cache list of available maps.
+        self.cache_time = cache_time
+        #Duration in seconds how long a directory listing is cached.
     
     def make_disp_name(self, server_name):
         """
@@ -132,6 +140,55 @@ class BaseDownloader(object):
         fsrv.close()
         floc.close()
         progress.update_final(size_down, "Downloaded")
+        
+    def get_cached_file_list(self):
+        """
+        Return the cached list of available maps (and other files).
+        Returns ``None`` if cached list is too old, or none exists.
+        
+        This is a utility function that should only be called inside the 
+        download module. High level code should call ``get_file_list``.
+        
+        Returns
+        -------
+        
+        list[MapMeta] | NoneType
+        """
+        if not self.application_dir:
+            return None
+        try:
+            pickle_name = str(type(self)) + "-dirlist.pickle"
+            pickle_path = path.join(self.application_dir, pickle_name)
+            pickle_time = path.getmtime(pickle_path)
+            if time.time() - pickle_time > self.cache_time:
+                return None
+            pickle_file = open(pickle_path, "rb")
+            file_list = cPickle.load(pickle_file)
+            pickle_file.close()
+            return file_list
+        except (OSError, cPickle.PickleError):
+            return None
+    
+    def set_cached_file_list(self, file_list):
+        """
+        Store the list of available maps (and other files) for later reuse.
+        Does nothing if application directory is not writable.
+        
+        Argument
+        --------
+        
+        file_list: list[MapMeta]
+        """
+        if not self.application_dir:
+            return
+        try:
+            pickle_name = str(type(self)) + "-dirlist.pickle"
+            pickle_path = path.join(self.application_dir, pickle_name)
+            pickle_file = open(pickle_path, "wb")
+            cPickle.dump(file_list, pickle_file, protocol=-1)
+            pickle_file.close()
+        except (OSError, cPickle.PickleError):
+            pass
 
 
 class OsmandDownloader(BaseDownloader):
@@ -140,8 +197,8 @@ class OsmandDownloader(BaseDownloader):
     """
     list_url = "http://download.osmand.net/list.php"
     
-    def __init__(self):
-        BaseDownloader.__init__(self)
+    def __init__(self, application_dir=None, cache_time=3600):
+        BaseDownloader.__init__(self, application_dir, cache_time)
     
     def make_disp_name(self, server_name):
         """
@@ -198,10 +255,16 @@ class OsmandDownloader(BaseDownloader):
             </body>
         </html>
         """
+        #Return cached file list if it exists and is recent
+        cached_file_list = self.get_cached_file_list()
+        if cached_file_list:
+            return cached_file_list
+        
         #Download HTML document with list of maps from server of Osmand project
         u = urllib2.urlopen(self.list_url)
         list_html = u.read()
 #        print list_html
+
         #Parse HTML list of maps
         root = lxml.html.document_fromstring(list_html)
         table = root.find(".//table")
@@ -218,6 +281,7 @@ class OsmandDownloader(BaseDownloader):
                                map_type="osmand")
             map_metas.append(map_meta)
         
+        self.set_cached_file_list(map_metas)
         return map_metas
     
     
@@ -238,8 +302,8 @@ class OpenandromapsDownloader(BaseDownloader):
 #                 "http://www.openandromaps.org/downloads/ubersichts-karten"
                  ]
 
-    def __init__(self):
-        BaseDownloader.__init__(self)
+    def __init__(self, application_dir=None, cache_time=3600):
+        BaseDownloader.__init__(self, application_dir, cache_time)
     
     def make_disp_name(self, server_name):
         """
@@ -286,11 +350,17 @@ class OpenandromapsDownloader(BaseDownloader):
         The function parses the regular, human readable, HTML documents, that
         lists the existing maps for Openandromaps. 
         """
+        #Return cached file list if it exists and is recent
+        cached_file_list = self.get_cached_file_list()
+        if cached_file_list:
+            return cached_file_list
+        
         map_metas = []
         for url in self.list_urls:
             #Download HTML document with list of maps from server of Osmand project
             downloader = urllib2.urlopen(url)
             list_html = downloader.read()
+            
             #Parse HTML list of maps
             root = lxml.html.document_fromstring(list_html)
             table = root.find(".//tbody")
@@ -306,4 +376,5 @@ class OpenandromapsDownloader(BaseDownloader):
                                    map_type="openandromaps")
                 map_metas.append(map_meta)
         
+        self.set_cached_file_list(map_metas)
         return map_metas
