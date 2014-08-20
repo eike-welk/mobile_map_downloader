@@ -37,7 +37,7 @@ import os
 from mob_map_dl.common import items_sorted
 from mob_map_dl.download import OsmandDownloader, OpenandromapsDownloader
 from mob_map_dl.local import OsmandManager, OpenandromapsManager
-from mob_map_dl.install import OsmandInstaller
+from mob_map_dl.install import OsmandInstaller, OruxmapsInstaller
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -101,7 +101,8 @@ class AppHighLevel(object):
         if self.mobile_device:
             try:
                 self.installers = {
-                                "osmand": OsmandInstaller(self.mobile_device)}
+                                "osmand": OsmandInstaller(self.mobile_device),
+                                "oam": OruxmapsInstaller(self.mobile_device)}
             except OSError, err:
                 print "Error while connecting to mobile device:"
                 print err

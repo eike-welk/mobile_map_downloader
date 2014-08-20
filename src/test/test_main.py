@@ -94,6 +94,7 @@ def test_AppHighLevel_get_filtered_map_list():
     maps = app.get_filtered_map_list(app.local_managers, ["*"])
     pprint(maps)
     assert len(maps) == 3
+    assert maps[0].disp_name == "oam/SouthAmerica_bermuda" 
     assert maps[1].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
     assert maps[2].disp_name == "osmand/Monaco_europe_2.obf"
     assert maps[0].full_name.find("test_data/maps") > 0
@@ -101,9 +102,10 @@ def test_AppHighLevel_get_filtered_map_list():
     #List all maps that are installed on the current device.
     maps = app.get_filtered_map_list(app.installers, ["*"])
     pprint(maps)
-    assert len(maps) == 2
-    assert maps[0].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
-    assert maps[1].disp_name == "osmand/Monaco_europe_2.obf"
+    assert len(maps) == 3
+    assert maps[0].disp_name == "oam/SouthAmerica_bermuda"
+    assert maps[1].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
+    assert maps[2].disp_name == "osmand/Monaco_europe_2.obf"
     assert maps[0].full_name.find("test_data/TEST-DEVICE1") > 0
     
 
@@ -372,4 +374,4 @@ if __name__ == "__main__":
     test_ConsoleAppMain_list_server_maps()
 #    test_ConsoleAppMain_parse_aguments()
     
-    pass
+    pass #IGNORE:W0107

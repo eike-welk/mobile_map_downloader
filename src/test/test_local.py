@@ -167,7 +167,7 @@ def test_OpenandromapManager_name_conversion():
     from mob_map_dl.local import OpenandromapsManager
     
     print "Start."
-    test_app_dir, test_dev_dir = create_writable_test_dirs("l4")
+    test_app_dir, _ = create_writable_test_dirs("l4")
     d1 = "oam/europe_France_North"
     d2 = "oam/asia_Kazakhstan"
     f1 = path.join(test_app_dir, "oam/europe_France_North.zip")
@@ -186,7 +186,7 @@ def test_OpenandromapManager_get_map_extractor():
     from mob_map_dl.local import OpenandromapsManager
     
     print "Start."
-    test_app_dir, test_dev_dir = create_writable_test_dirs("l5")
+    test_app_dir, _ = create_writable_test_dirs("l5")
 #    arch_path = path.join(test_app_dir, "oam/usa_Yellowstone_NP.zip")
     arch_path = path.join(test_app_dir, "oam/SouthAmerica_bermuda.zip")
     
@@ -208,4 +208,4 @@ if __name__ == "__main__":
 #    test_OpenandromapManager_name_conversion()
 #    test_OpenandromapManager_get_map_extractor()
     
-    pass
+    pass #IGNORE:W0107

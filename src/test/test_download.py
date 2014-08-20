@@ -77,7 +77,7 @@ def test_BaseDownloader_download_file():
     print "Start download_file"
     test_map_name = relative_path("../../test_tmp/test_1.obf.zip")
     try: os.remove(test_map_name)
-    except: pass
+    except OSError: pass
     assert not path.exists(test_map_name)
     
     #File size 0.2 MiB
@@ -201,4 +201,4 @@ if __name__ == "__main__":
 #    test_OpenandromapsDownloader_make_disp_name()
 #    test_OpenandromapsDownloader_get_file_list()
     
-    pass
+    pass #IGNORE:W0107

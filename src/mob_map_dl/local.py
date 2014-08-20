@@ -50,12 +50,11 @@ class BaseManager(object):
     Base class for local manager objects.
     """
     def __init__(self):
-        pass
+        self.download_dir = ""
+        #Path to directory where the maps are stored. Is accessed by command: 
+        # ``dlmap lsd -l`` 
     
     #--- Called by high level algorithms -------------------------------
-    download_dir = ""
-    #Path to directory where the maps are stored. Is accessed by command: 
-    # ``dlmap lsd -l`` 
     def make_disp_name(self, file_path):
         """Create canonical (display) name from path of map."""
         raise NotImplementedError()
@@ -160,7 +159,7 @@ class BaseManager(object):
             pattern with wildcards to filter the filenames in 
             ``self.download_dir``. For example: "*.map".
             
-        Return
+        Returns
         -------
         
         list[MapMeta]

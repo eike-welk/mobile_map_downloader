@@ -33,8 +33,7 @@ from __future__ import absolute_import
 import time
 import os
 import os.path as path
-import shutil
-from pprint import pprint
+#from pprint import pprint
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -117,4 +116,4 @@ if __name__ == "__main__":
 #    test_items_sorted()
     test_PartFile()
     
-    pass
+    pass #IGNORE:W0107

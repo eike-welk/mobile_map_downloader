@@ -12,9 +12,16 @@ The software is currently in **beta state**. It can be productively used by
 adventurous people, or semi experts. Expect it to lack some functionality, to
 crash often, and to sometimes do unwanted things.
 
-The program currently only supports **OsmAnd**: 
+Currently the offline map programs **OsmAnd** and **Oruxmaps** are supported: 
     
-    http://osmand.net/
+* http://osmand.net/
+* http://www.oruxmaps.com/index_en.html
+
+Maps can be installed from **Osmand** and from **Openandromaps**, which means 
+there is currently only one source of maps for each program:
+
+* http://download.osmand.net/rawindexes/
+* http://www.openandromaps.org/downloads
 
 If you find any **errors**, or if you have good ideas for the program,
 please put them into the project's **issue tracker**:

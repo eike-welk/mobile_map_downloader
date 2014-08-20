@@ -31,10 +31,8 @@ from __future__ import absolute_import
 #import pytest #contains `skip`, `fail`, `raises`, `config`
 
 import time
-import os
 import os.path as path
 from pprint import pprint
-import shutil
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -49,11 +47,31 @@ def relative_path(*path_comps):
     "Create file paths that are relative to the location of this file."
     return path.abspath(path.join(path.dirname(__file__), *path_comps))
 
+    
+def test_OsmandInstaller_name_conversion():
+    """OpenandromapsManager: Test the name conversion functions."""
+    from mob_map_dl.install import OsmandInstaller
+    
+    print "Start."
+    device_path = relative_path("../../test_data/TEST-DEVICE1")
+    d1 = "osmand/Jamaica_centralamerica_2.obf"
+    d2 = "osmand/Monaco_europe_2.obf"
+    f1 = path.join(device_path, "osmand/Jamaica_centralamerica_2.obf")
+    f2 = path.join(device_path, "osmand/Monaco_europe_2.obf")
+    
+    mgr = OsmandInstaller(device_path)
+    
+    assert mgr.make_disp_name(f1) == d1
+    assert mgr.make_disp_name(f2) == d2
+    assert mgr.make_full_name(d1) == f1
+    assert mgr.make_full_name(d2) == f2
+
 
 def test_OsmandInstaller_get_file_list():
     "OsmandInstaller: Get list of installed maps."
     from mob_map_dl.install import OsmandInstaller   
     
+    print "Start."
     device_path = relative_path("../../test_data/TEST-DEVICE1")
     
     i = OsmandInstaller(device_path)
@@ -67,32 +85,49 @@ def test_OsmandInstaller_get_file_list():
     assert l[1].size == 342685
 
     
-#def test_OsmandInstaller_install_map():
-#    "OsmandInstaller: Install one map file."
-#    from mob_map_dl.install import OsmandInstaller  
-#    from mob_map_dl.local import OsmandManager
-#    
-#    download_dir = relative_path("../../test_data/maps/")
-#    archive_path = relative_path("../../test_data/maps/osmand/Jamaica_centralamerica_2.obf.zip")
-#    device_dir = relative_path("../../test_tmp/TEST-DEVICE1")    
-#    map_path =   relative_path("../../test_tmp/TEST-DEVICE1/osmand/Jamaica_centralamerica_2.obf")
-#
-#    #Remove old output directory, and create new empty output directory
-#    shutil.rmtree(device_dir, ignore_errors=True)
-#    os.makedirs(path.join(device_dir, "osmand"))
-#    
-#    m = OsmandManager(download_dir)
-#    i = OsmandInstaller(device_dir)
-#    extractor, size_total, _ = m.get_map_extractor(archive_path)
-#    i.install_map(extractor, map_path, "osmand/Jamaica_centralamerica_2", size_total)
-#    
-#    print "path.getsize(archive_path):", path.getsize(map_path)
-#    assert path.isfile(map_path)
-#    assert path.getsize(map_path) == 4518034
+def test_OruxmapsInstaller_name_conversion():
+    """OpenandromapsManager: Test the name conversion functions."""
+    from mob_map_dl.install import OruxmapsInstaller
+    
+    print "Start."
+    device_path = relative_path("../../test_data/TEST-DEVICE1")
+    d1 = "oam/SouthAmerica_bermuda"
+    d2 = "oam/europe_France_South"
+    d3 = "project/country_name"
+    f1 = path.join(device_path, "oruxmaps/mapfiles/oam_SouthAmerica_bermuda.map")
+    f2 = path.join(device_path, "oruxmaps/mapfiles/oam_europe_France_South.map")
+    f3 = path.join(device_path, "oruxmaps/mapfiles/project_country_name.map")
+    
+    mgr = OruxmapsInstaller(device_path)
+    
+    assert mgr.make_disp_name(f1) == d1
+    assert mgr.make_disp_name(f2) == d2
+    assert mgr.make_disp_name(f3) == d3
+    assert mgr.make_full_name(d1) == f1
+    assert mgr.make_full_name(d2) == f2
+    assert mgr.make_full_name(d3) == f3
+
+
+def test_OruxmapsInstaller_get_file_list():
+    "OsmandInstaller: Get list of installed maps."
+    from mob_map_dl.install import OruxmapsInstaller   
+    
+    print "Start."
+    device_path = relative_path("../../test_data/TEST-DEVICE1")
+    
+    i = OruxmapsInstaller(device_path)
+    l = i.get_file_list()
+    
+    pprint(l)
+    assert len(l) == 1
+    assert l[0].disp_name == "oam/SouthAmerica_bermuda"
+    assert l[0].size == 447481
     
 
 if __name__ == "__main__":
+#    test_OsmandInstaller_name_conversion()
 #    test_OsmandInstaller_get_file_list()
-#    test_OsmandInstaller_install_map()
+    test_OruxmapsInstaller_name_conversion()
+#    test_OruxmapsInstaller_get_file_list()
     
-    pass
+    pass #IGNORE:W0107
