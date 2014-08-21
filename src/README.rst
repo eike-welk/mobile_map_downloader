@@ -2,11 +2,15 @@
 Mobile Map Downloader
 #####################
 
-Mobile Map Downloader is a command line program to download maps from the
-Internet and install them on mobile devices, such as smart phones. The program
-is intended to run on a (personal) computer, that has a fast and cheap Internet
-connection, and a large hard disk. The downloaded maps are also stored on the
-personal computer.
+**Mobile Map Downloader** is a command line program to download maps from the
+Internet and install them on mobile devices, such as smart phones. 
+
+The program is intended to run on a (personal) computer, that has a fast and
+cheap Internet connection, and a large hard disk. The downloaded maps are
+stored on the personal computer. Only the maps that are used for the current
+activity need to be installed on the mobile device. When different maps are
+required for an other activity they can be quickly installed from the personal
+computer's hard disk, without lengthy downloads. 
 
 The software is currently in **beta state**. It can be productively used by
 adventurous people, or semi experts. Expect it to lack some functionality, to
@@ -32,7 +36,9 @@ please put them into the project's **issue tracker**:
 Installation
 =======================================
 
-Open a terminal, get administrator/root privileges and type::
+The program has only been tested on **Linux**. It should run on **Mac OS X** and **Windows** with only minor modifications, however installation on these operating systems is probably more complicated.
+
+On **Linux**, open a terminal, get administrator/root privileges and type::
     
     pip install mobile-map-download --pre -U
 
