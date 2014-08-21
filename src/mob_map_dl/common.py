@@ -43,6 +43,10 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 logging.Formatter.converter = time.gmtime
 
 
+VERSION = "0.1.6"
+#Version of the program
+
+
 MapMeta = namedtuple("MapMeta", 
                      "disp_name, full_name, size, time, description, map_type")
 #Some meta data about each map

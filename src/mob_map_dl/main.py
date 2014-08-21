@@ -34,7 +34,7 @@ import fnmatch
 import os.path as path
 import os
 
-from mob_map_dl.common import items_sorted
+from mob_map_dl.common import items_sorted, VERSION
 from mob_map_dl.download import OsmandDownloader, OpenandromapsDownloader
 from mob_map_dl.local import OsmandManager, OpenandromapsManager
 from mob_map_dl.install import OsmandInstaller, OruxmapsInstaller
@@ -486,6 +486,8 @@ class ConsoleAppMain(object):
                     "Download and install maps for mobile devices.")
         parser.add_argument("-m", "--mobile_device", metavar="DIR",
                             help="directory that represents the mobile device")
+        parser.add_argument("--version", action="version", 
+                            version="Version: " + VERSION)
 #        parser.add_argument("-v", "--verbose", action="store_true",
 #                            help="output additional information for "
 #                                 "troubleshooting.")
@@ -553,7 +555,10 @@ class ConsoleAppMain(object):
         
         self.app.mobile_device = args.mobile_device
         
-        if args.subcommand == "lss":
+        if args.version:
+            print "Mobile Map Downloader, version:", VERSION
+            exit(0)
+        elif args.subcommand == "lss":
             func = self.list_server_maps
             arg_dict = {"long_form": args.long_form, # bool
                         "patterns": args.patterns}   # list[str]

@@ -1,6 +1,8 @@
 from setuptools import setup
 from os.path import join, dirname, abspath
 
+import mob_map_dl.common
+
 
 def relative(*path_fragments):
     "Create a file path that is relative to the location of this file."
@@ -19,7 +21,7 @@ def read(fname):
 
 #Start the setup machinery, give it detailed information about this library.
 setup(name="mobile-map-downloader",
-      version="0.1.7",
+      version=mob_map_dl.common.VERSION,
       description="Download maps for mobile devices over broadband, "
                   "with a personal computer.",
       long_description=read("README.rst"),

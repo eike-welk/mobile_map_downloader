@@ -1,14 +1,14 @@
 """
 ===============================================================================
-Create a release of "mobile_map_download". Upload files and metadata to PyPi.
+Create a release of "mobile_map_downloader". Upload files and metadata to PyPi.
 ===============================================================================
 
 This script can be used to automate the release of new versions of the
-"mobile_map_download" project, but it should also serve as documentation 
+"mobile_map_downloader" project, but it should also serve as documentation 
 for the somewhat complex release process.
 
-The PyPi site for "mobile_map_download" is at:
-   https://pypi.python.org/pypi/mobile_map_download
+The PyPi site for "mobile_map_downloader" is at:
+   https://pypi.python.org/pypi/mobile_map_downloader
 
 Usage
 ======
@@ -21,7 +21,7 @@ At the beginning of the release process you might want to run::
     
 This stores your PyPi user name and password in "~/.pypirc". This step is not
 necessary to make releases, but is convenient if you need several attempts to 
-get the release right. If user name and password are not stored in in 
+get the release right. If user name and password are not stored in 
 "~/.pypirc" Python's upload machinery will ask for them.
 
 To upload metadata and files to PyPi run::
@@ -41,11 +41,30 @@ import os
 import os.path as path 
 import textwrap
 #import shutil
-import subprocess
+import subprocess 
+
+import mob_map_dl.common
+
 
 def relative(*path_fragments):
     'Create a file path that is relative to the location of this file.'
     return path.abspath(path.join(path.dirname(__file__), *path_fragments))
+
+def make_release_tag():
+    "Create the relese tag from the version string"
+    return "release-" + mob_map_dl.common.VERSION
+
+def is_good_version():
+    """
+    Check program version and related Git tags. 
+    Returns False if version already exists, returns True otherwise.
+    """
+    git_tag_out = subprocess.check_output(["git", "tag"])
+    tags = git_tag_out.split("\n") #IGNORE:E1103
+    if make_release_tag() in tags:
+        return False
+    else:
+        return True
 
 
 #Parse the command line arguments of the release script
@@ -100,20 +119,30 @@ if args.start:
         pypirc_file.write(pypirc_text)
         
     #Remind of necessary actions, that are easily forgotten. 
-    print '\n=============================================='
-    print "* Don't forget to increase the version."
-    print '* Please run the tests before uploading a release!'
-    print '============================================\n'
-    #TODO: In the future, if tests really work, run the test suite.
+    print '\n=================================================='
+    if not is_good_version():
+        print "* Release '{}' already exists!".format(make_release_tag())
+        print "* Please increase the version."
+        print "*"
+    print '* Please run the tests before uploading a release.'
+    print '==================================================\n'
 
 
 #Do the release ---------------------------------------------------------------
-if args.upload:        
+if args.upload:
+    if not is_good_version():
+        print "Release '{}' already exists!".format(make_release_tag())
+        print "Please increase the version."
+        print "Exiting."
+        exit(1)
+        
     #Build source distribution, upload metadata, upload distribution(s)
-    subprocess.call(["python", "setup.py",
-                     "sdist", 
-                     "register", "-r", "pypi", 
-                     "upload", "-r", "pypi",])
+    subprocess.check_call(["python", "setup.py",
+                           "sdist", 
+                           "register", "-r", "pypi", 
+                           "upload", "-r", "pypi",])
+    #Create a new release tag
+    subprocess.check_call(["git", "tag", make_release_tag()])
 
 
 #Clean up from the release process. -------------------------------------------
