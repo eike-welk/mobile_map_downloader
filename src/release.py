@@ -108,12 +108,13 @@ if args.start:
     pypirc_text = textwrap.dedent(
         """
         [distutils]
-        index-servers = pypi
+        index-servers = 
+            pypi
         
         [pypi]
-        repository: http://www.python.org/pypi
-        username: {u}
-        password: {p}
+        #repository: http://www.python.org/pypi
+        username:{u}
+        password:{p}
         """.format(u=username, p=password))
     with open(pypirc_path, "w") as pypirc_file:
         pypirc_file.write(pypirc_text)
