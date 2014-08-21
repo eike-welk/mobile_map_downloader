@@ -555,10 +555,7 @@ class ConsoleAppMain(object):
         
         self.app.mobile_device = args.mobile_device
         
-        if args.version:
-            print "Mobile Map Downloader, version:", VERSION
-            exit(0)
-        elif args.subcommand == "lss":
+        if args.subcommand == "lss":
             func = self.list_server_maps
             arg_dict = {"long_form": args.long_form, # bool
                         "patterns": args.patterns}   # list[str]
