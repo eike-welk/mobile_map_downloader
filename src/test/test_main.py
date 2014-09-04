@@ -72,7 +72,18 @@ def create_writable_test_dirs(idx):
     shutil.copytree(relative_path("../../test_data/TEST-DEVICE1"), test_dev_dir)
     return test_app_dir, test_dev_dir
     
+
 #--- AppHighLevel
+def test_AppHighLevel_find_mobile_devices():
+    "AppHighLevel: test get_filtered_map_list()"
+    from mob_map_dl.main import AppHighLevel
+    
+    print "Start"
+    app = AppHighLevel()
+    d = app.find_mobile_devices()
+    print d
+    
+
 def test_AppHighLevel_get_filtered_map_list():
     "AppHighLevel: test get_filtered_map_list()"
     from mob_map_dl.main import AppHighLevel
@@ -362,6 +373,7 @@ def test_ConsoleAppMain_parse_aguments():
     
     
 if __name__ == "__main__":
+    test_AppHighLevel_find_mobile_devices()
 #    test_AppHighLevel_get_filtered_map_list()
 #    test_AppHighLevel_download_file()
 #    test_AppHighLevel_install_file()
@@ -371,7 +383,7 @@ if __name__ == "__main__":
 #    test_AppHighLevel_filter_possible_work()
 #    test_AppHighLevel_download_install()
 #    test_AppHighLevel_uninstall()
-    test_ConsoleAppMain_list_server_maps()
+#    test_ConsoleAppMain_list_server_maps()
 #    test_ConsoleAppMain_parse_aguments()
     
     pass #IGNORE:W0107

@@ -33,6 +33,8 @@ import sys
 import fnmatch
 import os.path as path
 import os
+import platform
+import subprocess
 
 from mob_map_dl.common import items_sorted, VERSION
 from mob_map_dl.download import OsmandDownloader, OpenandromapsDownloader
@@ -112,9 +114,7 @@ class AppHighLevel(object):
             print "No mobile device!"
             
     #TODO: find mobile devices. Recipe:
-    #    http://stackoverflow.com/questions/12672981/python-os-independent-list-of-available-storage-devices
-    #    http://stackoverflow.com/questions/24913655/how-to-get-mounted-on-in-python-for-external-devices
-    
+     
     def find_app_directory(self):
         """
         Find the directory of the program.
@@ -141,6 +141,52 @@ class AppHighLevel(object):
                 self.app_directory = app_dir
                 return app_dir
         return None
+        
+    def find_mobile_devices(self):
+        """
+        Find mobile mobile_dirs that are connected to the computer.
+        
+        Taken from:
+        http://stackoverflow.com/questions/12672981/python-os-independent-list-of-available-storage-mobile_dirs
+                 
+        Alternative Dbus solution:
+        http://stackoverflow.com/questions/24913655/how-to-get-mounted-on-in-python-for-external-mobile_dirs
+        """
+        mobile_dirs = []  #The mobile devices that we find
+        if self.mobile_device:
+            mobile_dirs.append(self.mobile_device)
+            
+        if platform.system() == "Linux":
+            #Parse the output of the "mount" program.
+            mount_run = subprocess.Popen('mount', shell=True, 
+                                         stdout=subprocess.PIPE)
+            mount_out, _err = mount_run.communicate()
+            
+            all_fsspecs = []    #some block devices are mounted several times    
+            for line in mount_out.split("\n"): #IGNORE:E1103
+                try:
+                    fsspec, _, fsdir, _, fstype, _opts = line.split(" ")
+                    print fsspec, fsdir, fstype
+                except ValueError:
+                    continue
+                if not fsspec.startswith("/") or fsspec in all_fsspecs:
+                    #ignore special devices and duplicates 
+                    continue
+                if not path.isdir(path.join(fsdir, "Android")):
+                    #Identify Android by a special directory 
+                    continue
+                all_fsspecs.append(fsspec)
+                mobile_dirs.append(fsdir)
+                 
+        elif platform.system() == "Windows":
+#            drivelist = subprocess.Popen('wmic logicaldisk get name,description', shell=True, stdout=subprocess.PIPE)
+#            drivelisto, err = drivelist.communicate()
+#            driveLines = drivelisto.split('\n')
+            pass
+        elif platform.system() == "MacOSX":
+            pass
+        
+        return mobile_dirs
         
     #--- Information Retrieval 
     def get_filtered_map_list(self, lister_dict, patterns):
