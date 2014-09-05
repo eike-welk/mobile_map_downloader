@@ -75,7 +75,11 @@ def create_writable_test_dirs(idx):
 
 #--- AppHighLevel
 def test_AppHighLevel_find_mobile_devices():
-    "AppHighLevel: test get_filtered_map_list()"
+    """
+    AppHighLevel: test find_mobile_devices()
+    
+    No real test, but at least the code for the current is run.
+    """
     from mob_map_dl.main import AppHighLevel
     
     print "Start"

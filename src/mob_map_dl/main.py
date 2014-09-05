@@ -87,8 +87,19 @@ class AppHighLevel(object):
         if mobile_device:
             self.mobile_device = mobile_device
             
-        if not self.find_app_directory():
-            self.create_app_directory()
+        if not self.app_directory:
+            self.app_directory = self.find_app_directory()
+        if not self.app_directory:
+            self.app_directory = self.create_app_directory()
+        
+        if not self.mobile_device:
+            dev_list = self.find_mobile_devices()
+            if len(dev_list) == 1:
+                self.mobile_device = dev_list[0]
+            elif len(dev_list) > 1:
+                print "Found multiple mobile devices. Please specify a device."
+                for device in dev_list:
+                    print device
             
         #Create downloaders, they can function without ``app_directory``
         self.downloaders = {"osmand": OsmandDownloader(self.app_directory),
@@ -113,8 +124,6 @@ class AppHighLevel(object):
         else:
             print "No mobile device!"
             
-    #TODO: find mobile devices. Recipe:
-     
     def find_app_directory(self):
         """
         Find the directory of the program.
@@ -127,7 +136,6 @@ class AppHighLevel(object):
         for app_dir in self.app_directory_choices:
             app_dir = path.expanduser(app_dir)
             if path.isdir(app_dir):
-                self.app_directory = app_dir
                 return app_dir
         return None
         
@@ -138,13 +146,22 @@ class AppHighLevel(object):
             root, _ = path.split(app_dir)
             if path.isdir(root):
                 os.mkdir(app_dir)
-                self.app_directory = app_dir
                 return app_dir
         return None
         
     def find_mobile_devices(self):
         """
-        Find mobile mobile_dirs that are connected to the computer.
+        Find mobile devices that are connected to the computer.
+        The device in ``self.mobile_device`` is included if present.
+        
+        Returns
+        -------
+        
+        list[str]
+            Directories that represent a mobile device. 
+        
+        Note
+        -----
         
         Taken from:
         http://stackoverflow.com/questions/12672981/python-os-independent-list-of-available-storage-mobile_dirs
@@ -162,11 +179,11 @@ class AppHighLevel(object):
                                          stdout=subprocess.PIPE)
             mount_out, _err = mount_run.communicate()
             
-            all_fsspecs = []    #some block devices are mounted several times    
+            all_fsspecs = set()    #some block devices are mounted several times    
             for line in mount_out.split("\n"): #IGNORE:E1103
                 try:
                     fsspec, _, fsdir, _, fstype, _opts = line.split(" ")
-                    print fsspec, fsdir, fstype
+#                    print fsspec, fsdir, fstype
                 except ValueError:
                     continue
                 if not fsspec.startswith("/") or fsspec in all_fsspecs:
@@ -175,7 +192,7 @@ class AppHighLevel(object):
                 if not path.isdir(path.join(fsdir, "Android")):
                     #Identify Android by a special directory 
                     continue
-                all_fsspecs.append(fsspec)
+                all_fsspecs.add(fsspec)
                 mobile_dirs.append(fsdir)
                  
         elif platform.system() == "Windows":
