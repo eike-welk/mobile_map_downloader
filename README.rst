@@ -40,7 +40,7 @@ The program has only been tested on **Linux**. It should run on **Mac OS X** and
 
 On **Linux**, open a terminal, get administrator/root privileges and type::
     
-    pip install mobile-map-download --pre -U
+    pip install mobile-map-downloader --pre -U
 
 Alternatively you can install the program with **Virtualenv**. With Virtualenv
 you don't need root privileges, and can delete the program from your computer
@@ -49,7 +49,11 @@ without a trace::
     virtualenv virtualenv/  #can use any name for the directory
     cd virtualenv
     source bin/activate
-    pip install mobile-map-download --pre -U
+    pip install mobile-map-downloader --pre -U
+
+The program's page on PyPI, the Python Package Index, is:
+
+    https://pypi.python.org/pypi/mobile-map-downloader/
 
 
 Usage
