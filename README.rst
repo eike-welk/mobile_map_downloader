@@ -51,10 +51,6 @@ without a trace::
     source bin/activate
     pip install mobile-map-downloader --pre -U
 
-The program's page on PyPI, the Python Package Index, is:
-
-    https://pypi.python.org/pypi/mobile-map-downloader/
-
 
 Usage
 =======================================
@@ -94,4 +90,8 @@ Development is coordinated on Github:
 The **issue tracker** for errors and good ideas is here:
 
    https://github.com/eike-welk/mobile_map_downloader/issues 
+
+The program's page on PyPI, the Python Package Index, is:
+
+    https://pypi.python.org/pypi/mobile-map-downloader/
 
