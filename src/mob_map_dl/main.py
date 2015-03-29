@@ -589,7 +589,7 @@ class ConsoleAppMain(object):
             "install", help="download maps and install them",
             description="Download maps from the Internet and install them on"
                         "a mobile device. As default only downloads and "
-                        "installs missing maps. Use option '-u' to update to"
+                        "installs missing maps. Use option '-u' to update to "
                         "newer version of a map.")
         install_prs.add_argument("-u", "--update_newer", action="store_true",
                                  help="update maps if newer version is "
