@@ -2,7 +2,7 @@
 ###############################################################################
 #    Mobile Map Downloader - Download maps for your mobile phone.             #
 #                                                                             #
-#    Copyright (C) 2014 by Eike Welk                                          #
+#    Copyright (C) 2015 by Eike Welk                                          #
 #    eike.welk@gmx.net                                                        #
 #                                                                             #
 #    License: GPL Version 3                                                   #
@@ -94,6 +94,20 @@ def create_writable_test_dirs(idx):
     return test_app_dir, test_dev_dir
 
 
+def test_find_index():
+    "Test internal helper function ``find_index``."
+    
+    l = ["the foo", "the bar", "the baz", "the boo"]
+    def slice_47(s):
+        return s[4:7]
+
+    idx = find_index(l, "bar", slice_47)
+    assert idx == 1
+
+    idx = find_index(l, "moo", slice_47)
+    assert idx is None
+
+
 def test_BaseDownloader_download_file():
     "Test class OsmandDownloader: Downloading of files from Osmand server."
     from mob_map_dl.download import BaseDownloader
@@ -113,10 +127,11 @@ def test_BaseDownloader_download_file():
     d.download_file(url, test_map_name, "test-file-name.foo")
     
     #Test name and size of downloaded file
+    #The actual file size will vary with each revision of the map.
     assert path.isfile(test_map_name)
     file_size = path.getsize(test_map_name)/1024**2
     print "file size [MiB]:", file_size
-    assert round(file_size, 1) == 0.2
+    assert 0.2 < file_size < 0.5
     
     
 def test_OsmandDownloader_get_file_list():
@@ -144,7 +159,7 @@ def test_OsmandDownloader_get_file_list():
     assert l[0].disp_name == "osmand/Afghanistan_asia_2.obf"
     assert l[-1].disp_name == "osmand/Zimbabwe_africa_2.obf"
     #Number of files must be in certain range.
-    assert 500 < len(l) < 550
+    assert 500 < len(l) < 600
         
     #Test if the extracted URLs are correct
     idx = find_index(l, "osmand/Monaco_europe_2.obf", get_disp_name)
@@ -153,7 +168,7 @@ def test_OsmandDownloader_get_file_list():
     map_zip = fsrv.read()
     len_mib = len(map_zip) / 1024**2
     print len(map_zip), "B", len_mib, "MiB", round(len_mib, 1), "MiB rounded"
-    assert round(len_mib, 1) == 0.2
+    assert 0.2 < len_mib < 0.5
 
     
 def test_OsmandDownloader_chaching_mechanism():
@@ -269,7 +284,7 @@ def test_OpenandromapsDownloader_get_file_list():
     len_mib = len(map_zip) / 1024**2
     print len(map_zip), "B", len_mib, "MiB", round(len_mib, 1), "MiB rounded"
     #Test rough dimensions, exact size changes with every new revision
-    assert 1.8 < len_mib < 2.2
+    assert 1.8 < len_mib < 3.0
 
 
 if __name__ == "__main__":
