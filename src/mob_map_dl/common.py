@@ -43,7 +43,7 @@ logging.basicConfig(format='%(asctime)s: %(levelname)s: %(message)s',
 logging.Formatter.converter = time.gmtime
 
 
-VERSION = "0.1.9"
+VERSION = "0.1.10a1"
 #Version of the program
 
 
