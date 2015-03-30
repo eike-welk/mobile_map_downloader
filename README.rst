@@ -3,7 +3,7 @@ Mobile Map Downloader
 #####################
 
 **Mobile Map Downloader** is a command line program to download maps from the
-Internet and install them on mobile devices, such as smart phones. 
+Internet and install them on a mobile device, such as a smart phone. 
 
 The program is intended to run on a (personal) computer, that has a fast and
 cheap Internet connection, and a large hard disk. The downloaded maps are

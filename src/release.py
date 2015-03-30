@@ -40,7 +40,7 @@ import getpass
 import os
 import os.path as path 
 import textwrap
-#import shutil
+import shutil
 import subprocess 
 
 import mob_map_dl.common
@@ -118,7 +118,7 @@ if args.start:
         """.format(u=username, p=password))
     with open(pypirc_path, "w") as pypirc_file:
         pypirc_file.write(pypirc_text)
-        
+
     #Remind of necessary actions, that are easily forgotten. 
     print '\n=================================================='
     if not is_good_version():
@@ -137,6 +137,9 @@ if args.upload:
         print "Exiting."
         exit(1)
         
+    #Copy ``README.rst`` from the upper level directory.
+    shutil.copy(relative("..", "README.rst"), relative("README.rst"))
+        
     #Build source distribution, upload metadata, upload distribution(s)
     subprocess.check_call(["python", "setup.py",
                            "sdist", 
@@ -148,9 +151,20 @@ if args.upload:
 
 #Clean up from the release process. -------------------------------------------
 if args.cleanup:
+    things_done = 0
+
     #Remove the ".pypirc" file.
     if path.exists(pypirc_path):
         print 'Removing "~/.pypirc".'
         os.remove(pypirc_path)
-    else:
+        things_done += 1
+
+    #Remove ``README.rst`` from this directory
+    if path.exists(relative("README.rst")):
+        print 'Removing "README.rst"'
+        os.remove(relative("README.rst"))
+        things_done += 1
+
+    if things_done == 0:
         print 'Nothing to do.'
+
