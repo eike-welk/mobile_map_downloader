@@ -51,6 +51,29 @@ without a trace::
     source bin/activate
     pip install mobile-map-downloader --pre -U
 
+Broken ``pip`` in openSUSE 13.2
+---------------------------------------
+
+The Python installation program ``pip`` is broken in openSUSE 13.2, 
+and possibly other Linux distributions: 
+The present ``pip`` is for Python 3, while the system Python
+is Python 2.7.8. The programs ``pip2`` or ``pip2.7`` are missing.
+
+Therefore ``pip`` can't install any programs for the system Python on 
+openSUSE 13.2. 
+
+As a workaround a new ``pip`` can be easily installed from the program's
+website: Download the script 
+`get-pip.py <https://bootstrap.pypa.io/get-pip.py>`_
+and run it with the system's regular Python interpreter. 
+(This requires root privileges.)::
+
+    python get-pip.py
+
+This will create a working ``pip`` on your computer, which can then install ``mobile-map-downloader``. The process is described in more detail in Pip's documentation:
+
+    https://pip.pypa.io/en/latest/installing.html
+
 
 Usage
 =======================================

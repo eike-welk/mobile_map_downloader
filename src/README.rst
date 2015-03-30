@@ -1,1 +1,1 @@
-/home/eike/codedir/mobile_map_downloader/README.rst
+../README.rst
