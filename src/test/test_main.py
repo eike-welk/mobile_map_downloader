@@ -64,8 +64,8 @@ def create_writable_test_dirs(idx):
         Device directory  with test data.
     """
     idx = str(idx)
-    test_app_dir = relative_path("../../test_tmp/mob_map_dl" + idx)
-    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE" + idx)
+    test_app_dir = relative_path("../../test_tmp/mob_map_dl-" + idx)
+    test_dev_dir = relative_path("../../test_tmp/TEST-DEVICE-" + idx)
     shutil.rmtree(test_app_dir, ignore_errors=True)
     shutil.rmtree(test_dev_dir, ignore_errors=True)
     shutil.copytree(relative_path("../../test_data/maps"), test_app_dir)
@@ -78,7 +78,7 @@ def test_AppHighLevel_find_mobile_devices():
     """
     AppHighLevel: test find_mobile_devices()
     
-    No real test, but at least the code for the current is run.
+    No real test, but at least the code for the current algorithm is run.
     """
     from mob_map_dl.main import AppHighLevel
     
@@ -93,10 +93,10 @@ def test_AppHighLevel_get_filtered_map_list():
     from mob_map_dl.main import AppHighLevel
     
     print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m01")
     app = AppHighLevel()
-    app.create_low_level_components(
-                app_directory=relative_path("../../test_data/maps"),
-                mobile_device=relative_path("../../test_data/TEST-DEVICE1"))
+    app.create_low_level_components(app_directory=app_directory, 
+                                    mobile_device=mobile_device)
     
     #List maps on remote servers whose names contain the word "Monaco".
     maps = app.get_filtered_map_list(app.downloaders, ["*Monaco*"])
@@ -112,7 +112,7 @@ def test_AppHighLevel_get_filtered_map_list():
     assert maps[0].disp_name == "oam/SouthAmerica_bermuda" 
     assert maps[1].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
     assert maps[2].disp_name == "osmand/Monaco_europe_2.obf"
-    assert maps[0].full_name.find("test_data/maps") > 0
+    assert maps[0].full_name.find("test_tmp/mob_map_dl") > 0
     
     #List all maps that are installed on the current device.
     maps = app.get_filtered_map_list(app.installers, ["*"])
@@ -121,7 +121,7 @@ def test_AppHighLevel_get_filtered_map_list():
     assert maps[0].disp_name == "oam/SouthAmerica_bermuda"
     assert maps[1].disp_name == "osmand/Jamaica_centralamerica_2.obf" 
     assert maps[2].disp_name == "osmand/Monaco_europe_2.obf"
-    assert maps[0].full_name.find("test_data/TEST-DEVICE1") > 0
+    assert maps[0].full_name.find("test_tmp/TEST-DEVICE") > 0
     
 
 def test_AppHighLevel_plan_work():
@@ -162,7 +162,7 @@ def test_AppHighLevel_filter_possible_work():
     
     print "Start"
     #Create application and device directories to initialize the application
-    app_directory, mobile_device = create_writable_test_dirs("m0")
+    app_directory, mobile_device = create_writable_test_dirs("m02")
     #Create source and destination lists
     work = [MapMeta("osmand/map1", None, None, None, None, None),
             MapMeta("foo/map2", None, None, None, None, None),
@@ -184,7 +184,7 @@ def test_AppHighLevel_download_file():
     from mob_map_dl.common import MapMeta
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m1")    
+    app_directory, mobile_device = create_writable_test_dirs("m03")    
     file_meta = MapMeta(disp_name="osmand/Cape-verde_africa_2.obf", 
                         full_name="http://download.osmand.net/download.php?standard=yes&file=Cape-verde_africa_2.obf.zip", 
                         size=None, time=None, description=None, map_type=None)
@@ -204,7 +204,7 @@ def test_AppHighLevel_install_file():
     from mob_map_dl.common import MapMeta
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m2")
+    app_directory, mobile_device = create_writable_test_dirs("m04")
     file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
                         full_name=path.join(app_directory, 
                                             "osmand/Monaco_europe_2.obf.zip"), 
@@ -226,7 +226,7 @@ def test_AppHighLevel_delete_file_mobile():
     from mob_map_dl.common import MapMeta
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m4")
+    app_directory, mobile_device = create_writable_test_dirs("m05")
     file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
                         full_name=None, size=None, time=None, 
                         description=None, map_type=None)
@@ -249,7 +249,7 @@ def test_AppHighLevel_delete_file_local():
     from mob_map_dl.common import MapMeta
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m4")
+    app_directory, mobile_device = create_writable_test_dirs("m06")
     file_meta = MapMeta(disp_name="osmand/Monaco_europe_2.obf", 
                         full_name=None, size=None, time=None, 
                         description=None, map_type=None)
@@ -271,7 +271,7 @@ def test_AppHighLevel_download_install():
     from mob_map_dl.main import AppHighLevel
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m5")
+    app_directory, mobile_device = create_writable_test_dirs("m07")
     
     app = AppHighLevel()
     app.create_low_level_components(app_directory, mobile_device)
@@ -289,7 +289,7 @@ def test_AppHighLevel_uninstall():
     from mob_map_dl.main import AppHighLevel
     
     print "Start"
-    app_directory, mobile_device = create_writable_test_dirs("m6")
+    app_directory, mobile_device = create_writable_test_dirs("m08")
     mob_file = path.join(mobile_device, "osmand", "Monaco_europe_2.obf")
     loc_file = path.join(app_directory, "osmand", "Monaco_europe_2.obf.zip")
     #Test if files that will be deleted exist
@@ -312,9 +312,10 @@ def test_ConsoleAppMain_list_server_maps():
     from mob_map_dl.main import ConsoleAppMain
     
     print "Start"
+    app_directory, mobile_device = create_writable_test_dirs("m09")
     m = ConsoleAppMain()
-    m.app.create_low_level_components(
-                        app_directory=relative_path("../../test_data/maps"))
+    m.app.create_low_level_components(app_directory=app_directory, 
+                                      mobile_device=mobile_device)
     
     m.list_server_maps([], long_form=True)
     print 
@@ -377,7 +378,7 @@ def test_ConsoleAppMain_parse_aguments():
     
     
 if __name__ == "__main__":
-    test_AppHighLevel_find_mobile_devices()
+#    test_AppHighLevel_find_mobile_devices()
 #    test_AppHighLevel_get_filtered_map_list()
 #    test_AppHighLevel_download_file()
 #    test_AppHighLevel_install_file()

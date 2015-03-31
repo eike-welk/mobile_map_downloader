@@ -1,5 +1,5 @@
 /.settings/*
 *.pyc
+*.swp
 
 /virtualenv
-/.README.rst.swp
