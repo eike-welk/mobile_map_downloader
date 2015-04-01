@@ -35,7 +35,7 @@ import lxml.html
 import dateutil.parser
 import urlparse
 
-from mob_map_dl.common import MapMeta, TextProgressBar, PartFile
+from mob_map_dl.common import MapMeta, TextProgressBar, PartFile, VERSION
 
 
 #Set up logging fore useful debug output, and time stamps in UTC.
@@ -56,6 +56,8 @@ class BaseDownloader(object):
         """
         Object is initialized with the application's directory by top level.
         """
+        self.headers = {'User-Agent': 'mobile-map-downloader/' + VERSION}
+        #Headers for the http request to download the data
         self.application_dir = application_dir
         #Directory of the application. Used to cache list of available maps.
         self.cache_time = cache_time
@@ -72,7 +74,7 @@ class BaseDownloader(object):
         Argument
         --------
         
-        full_name: str
+        sever_name: str
             The complete name that is used to address the file. For example
             the download URL. 
             
@@ -86,7 +88,7 @@ class BaseDownloader(object):
     
     def get_file_list(self):
         """
-        Get list of maps for Osmand that are available for download.
+        Get list of files (maps) that are available for download.
         
         Return
         -------
@@ -118,7 +120,8 @@ class BaseDownloader(object):
         TODO: Dynamically adapt ``buff_size`` so that the animation is updated
               once per second.  
         """
-        fsrv = urllib2.urlopen(srv_url)
+        req = urllib2.Request(srv_url, None, self.headers)
+        fsrv = urllib2.urlopen(req)
         floc = PartFile(loc_name, "wb")
         
         meta = fsrv.info()
@@ -261,7 +264,8 @@ class OsmandDownloader(BaseDownloader):
             return cached_file_list
         
         #Download HTML document with list of maps from server of Osmand project
-        u = urllib2.urlopen(self.list_url)
+        req = urllib2.Request(self.list_url, None, self.headers)
+        u = urllib2.urlopen(req)
         list_html = u.read()
 #        print list_html
 
@@ -358,7 +362,8 @@ class OpenandromapsDownloader(BaseDownloader):
         map_metas = []
         for url in self.list_urls:
             #Download HTML document with list of maps from server of Osmand project
-            downloader = urllib2.urlopen(url)
+            req = urllib2.Request(url, None, self.headers)
+            downloader = urllib2.urlopen(req)
             list_html = downloader.read()
             
             #Parse HTML list of maps

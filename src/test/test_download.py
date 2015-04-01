@@ -109,7 +109,7 @@ def test_find_index():
 
 
 def test_BaseDownloader_download_file():
-    "Test class OsmandDownloader: Downloading of files from Osmand server."
+    "Test class BaseDownloader: Downloading of files from a server on the Internet."
     from mob_map_dl.download import BaseDownloader
     
     print "Start download_file"
